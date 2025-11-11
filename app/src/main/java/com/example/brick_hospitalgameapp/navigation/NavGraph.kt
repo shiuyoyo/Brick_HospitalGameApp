@@ -15,6 +15,7 @@ import com.example.brick_hospitalgameapp.screens.LoginScreen
 import com.example.brick_hospitalgameapp.screens.ProfileScreen
 import com.example.brick_hospitalgameapp.ui.screens.GameScreenSingleColor
 import com.example.brick_hospitalgameapp.ui.screens.GameSummaryScreen
+import com.example.brick_hospitalgameapp.ui.screens.GameScreenMultiColor
 
 @Composable
 fun AppNavGraph(navController: NavHostController, userProfile: UserProfile?) {
@@ -58,6 +59,28 @@ fun AppNavGraph(navController: NavHostController, userProfile: UserProfile?) {
                 mockUserId = userId
             )
         }
+
+        composable(
+            "game_multi_color/{levelName}/{userId}/{colorMode}",
+            arguments = listOf(
+                navArgument("levelName") { type = NavType.StringType },
+                navArgument("userId") { type = NavType.StringType; nullable = true },
+                navArgument("colorMode") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val levelName = backStackEntry.arguments?.getString("levelName") ?: "關卡1"
+            val userId = backStackEntry.arguments?.getString("userId")
+            val colorMode = backStackEntry.arguments?.getString("colorMode") ?: "固定顏色"
+
+            GameScreenMultiColor(
+                navController = navController,
+                userProfile = userProfile,
+                mockUserId = userId,
+                levelName = levelName,
+                colorMode = colorMode
+            )
+        }
+
 
         composable(
             route = "game_summary/{correct}/{wrong}/{totalTime}/{levelName}/{userId}",

@@ -25,14 +25,15 @@ fun LevelSettingsScreen(
     navController: NavController,
     levelName: String,
     userProfile: UserProfile?,
-    mockUserId: String?
+    mockUserId: String?,
+    userId: String="unknown"
 ) {
     val context = LocalContext.current
     val currentUserId = userProfile?.id ?: mockUserId ?: "mock_user"
 
     val practiceTimes = listOf(3,5,10,15,20,25,30)
     val intervalTimes = listOf(5,10,15,20,25)
-    val colorModes = listOf("固定顏色", "多色顏色")
+    val colorModes = listOf("固定顏色", "多色順序", "多色隨機")
 
     var selectedPracticeTime by remember { mutableStateOf(20) }
     var selectedInterval by remember { mutableStateOf(20) }
@@ -137,7 +138,18 @@ fun LevelSettingsScreen(
             Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterEnd) {
                 Button(
                     onClick = {
-                        navController.navigate("game_single_color/$levelName/$currentUserId")
+                        when (selectedColorMode) {
+                            "固定顏色" -> {
+                                navController.navigate("game_single_color/$levelName/$userId")
+                            }
+                            //colorMode: String = "sequence" // "fixed" / "sequence" / "random"
+                            "多色-照順序" -> {
+                                navController.navigate("game_multi_color/$levelName/$userId/'sequence'")
+                            }
+                            "多色-隨機" -> {
+                                navController.navigate("game_multi_color/$levelName/$userId/'random'")
+                            }
+                        }
                     },
                     modifier = Modifier.width(200.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4F46E5)),
@@ -145,6 +157,7 @@ fun LevelSettingsScreen(
                 ) {
                     Text("開始遊戲", color = Color.White, style = MaterialTheme.typography.titleMedium)
                 }
+
             }
         }
     }

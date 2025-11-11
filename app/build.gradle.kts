@@ -74,5 +74,7 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
 
     implementation("androidx.navigation:navigation-compose:2.7.3")
+    //usb microbit
+    implementation("com.github.mik3y:usb-serial-for-android:3.5.0")
 
 }
