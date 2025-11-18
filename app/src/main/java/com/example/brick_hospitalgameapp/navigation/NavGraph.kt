@@ -1,6 +1,7 @@
 package com.example.brick_hospitalgameapp.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -16,7 +17,7 @@ import com.example.brick_hospitalgameapp.screens.ProfileScreen
 import com.example.brick_hospitalgameapp.ui.screens.GameScreenSingleColor
 import com.example.brick_hospitalgameapp.ui.screens.GameSummaryScreen
 import com.example.brick_hospitalgameapp.ui.screens.GameScreenMultiColor
-
+import com.example.brick_hospitalgameapp.ui.screens.GameSummaryScreenMultiColor
 @Composable
 fun AppNavGraph(navController: NavHostController, userProfile: UserProfile?) {
     NavHost(
@@ -105,6 +106,35 @@ fun AppNavGraph(navController: NavHostController, userProfile: UserProfile?) {
                 totalTime = totalTime,
                 levelName = levelName,
                 mockUserId = mockUserId
+            )
+        }
+
+
+        composable(
+            route = "game_summary_multi_color/{levelName}/{mockUserId}/{totalTimeSeconds}",
+            arguments = listOf(
+                navArgument("levelName") { type = NavType.StringType },
+                navArgument("mockUserId") { type = NavType.StringType; nullable = true },
+                navArgument("totalTimeSeconds") { type = NavType.IntType }
+            )
+        ) { backStackEntry ->
+            val levelName = backStackEntry.arguments?.getString("levelName") ?: "Unknown Level"
+            val mockUserId = backStackEntry.arguments?.getString("mockUserId") ?: "mock_user"
+            val totalTime = backStackEntry.arguments?.getInt("totalTimeSeconds") ?: 60
+
+            // 從 savedStateHandle 取分數/失誤 Map
+            val scoreMap = navController.previousBackStackEntry?.savedStateHandle?.get<Map<Color, Int>>("scoreMap") ?: emptyMap()
+            val mistakesMap = navController.previousBackStackEntry?.savedStateHandle?.get<Map<Color, Int>>("mistakesMap") ?: emptyMap()
+
+            GameSummaryScreenMultiColor(
+                navController = navController,
+                totalTime = totalTime,
+                //scoreMap = scoreMap,
+                //mistakesMap = mistakesMap,
+                levelName = levelName,
+                mockUserId = mockUserId,
+                //correctCount = scoreMap.values.sum(),
+                //wrongCount = mistakesMap.values.sum()
             )
         }
 

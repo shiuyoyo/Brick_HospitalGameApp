@@ -138,16 +138,20 @@ fun LevelSettingsScreen(
             Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterEnd) {
                 Button(
                     onClick = {
+                        val uid = userProfile?.id ?: mockUserId ?: "guest"
+
                         when (selectedColorMode) {
                             "固定顏色" -> {
-                                navController.navigate("game_single_color/$levelName/$userId")
+                                navController.navigate("game_single_color/$levelName/$uid")
                             }
-                            //colorMode: String = "sequence" // "fixed" / "sequence" / "random"
-                            "多色-照順序" -> {
-                                navController.navigate("game_multi_color/$levelName/$userId/'sequence'")
+                            "多色順序" -> {
+                                navController.navigate("game_multi_color/$levelName/$uid/sequence")
                             }
-                            "多色-隨機" -> {
-                                navController.navigate("game_multi_color/$levelName/$userId/'random'")
+                            "多色隨機" -> {
+                                navController.navigate("game_multi_color/$levelName/$uid/random")
+                            }
+                            else -> {
+                                navController.navigate("game_single_color/$levelName/$uid")
                             }
                         }
                     },
@@ -157,8 +161,8 @@ fun LevelSettingsScreen(
                 ) {
                     Text("開始遊戲", color = Color.White, style = MaterialTheme.typography.titleMedium)
                 }
-
             }
+
         }
     }
 }
