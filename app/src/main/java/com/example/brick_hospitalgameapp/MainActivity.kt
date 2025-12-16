@@ -10,7 +10,7 @@ import androidx.compose.runtime.setValue
 import androidx.navigation.compose.rememberNavController
 import com.example.brick_hospitalgameapp.models.UserProfile
 import com.example.brick_hospitalgameapp.ui.theme.Brick_hospitalgameappTheme
-import com.example.brick_hospitalgameapp.navigation.AppNavGraph
+import com.example.brick_hospitalgameapp.navigation.AppNavigation
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -24,7 +24,7 @@ class MainActivity : ComponentActivity() {
                     mutableStateOf(null)
                 }
 
-                AppNavGraph(navController = navController, userProfile = mockUserProfile)
+                AppNavigation(navController = navController, userProfile = mockUserProfile)
             }
         }
     }

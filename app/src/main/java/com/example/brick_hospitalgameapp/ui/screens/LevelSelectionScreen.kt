@@ -1,4 +1,4 @@
-package com.example.brick_hospitalgameapp.screens
+package com.example.brick_hospitalgameapp.ui.screens
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -10,6 +10,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -26,9 +27,9 @@ fun LevelSelectionScreen(
     mockUserId: String?
 ) {
     val context = LocalContext.current
-    val currentUserId = userProfile?.id ?: mockUserId ?: "mock_user"
+    val currentUserId = mockUserId ?: "mock_user"
 
-    // 使用專案中已經定義好的 ModeData
+    // 既有的 ModeData
     val modes = listOf(
         ModeData("關卡1", "mode1.png"),
         ModeData("關卡2", "mode2.png"),
@@ -41,21 +42,10 @@ fun LevelSelectionScreen(
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // 顯示歡迎文字
         Text(
-            text = if (userProfile != null) {
-                "歡迎, ${userProfile.full_name ?: userProfile.username ?: "訪客"}"
-            } else {
-                "歡迎, 訪客"
-            },
-            style = MaterialTheme.typography.headlineSmall,
-            color = Color.Black, // 可依背景改成 Color.White
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 16.dp)
+            text = "選擇關卡",
+            style = MaterialTheme.typography.headlineMedium
         )
-
-        Text("選擇關卡", style = MaterialTheme.typography.headlineMedium)
         Spacer(modifier = Modifier.height(24.dp))
 
         Row(
@@ -64,33 +54,55 @@ fun LevelSelectionScreen(
             verticalAlignment = Alignment.CenterVertically
         ) {
             modes.forEach { mode ->
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .aspectRatio(1f)
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(Color(0xFFDBEAFE))
-                        .clickable {
-                            // 點擊整個關卡區塊 → LevelSettingsScreen
-                            navController.navigate("level_settings/${mode.name}/$currentUserId")
+                val isEnabled = mode.name != "關卡3" // 關卡三暫時沒有
+                val boxModifier = Modifier
+                    .weight(1f)
+                    .aspectRatio(1f)
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(Color(0xFFDBEAFE))
+                    .then(
+                        if (isEnabled) {
+                            Modifier.clickable {
+                                when (mode.name) {
+                                    "關卡1" -> {
+                                        // 導航到顏色遊戲的設定頁面
+                                        navController.navigate("level_settings/顏色遊戲/$currentUserId")
+                                    }
+                                    "關卡2" -> {
+                                        // 導航到形狀遊戲的設定頁面
+                                        navController.navigate("level_settings_shapes/形狀遊戲/$currentUserId")
+                                    }
+                                }
+                            }
+                        } else {
+                            Modifier // 不可點
                         }
-                        .padding(8.dp),
+                    )
+                    .padding(8.dp)
+                    .alpha(if (isEnabled) 1f else 0.5f)
+
+                Box(
+                    modifier = boxModifier,
                     contentAlignment = Alignment.Center
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Image(
-                            painter = painterResource(
-                                id = context.resources.getIdentifier(
-                                    mode.imageName.substringBeforeLast("."),
-                                    "drawable",
-                                    context.packageName
-                                )
-                            ),
-                            contentDescription = mode.name,
-                            modifier = Modifier.fillMaxSize(0.7f)
+                        val resId = context.resources.getIdentifier(
+                            mode.imageName.substringBeforeLast("."),
+                            "drawable",
+                            context.packageName
                         )
+                        if (resId != 0) {
+                            Image(
+                                painter = painterResource(id = resId),
+                                contentDescription = mode.name,
+                                modifier = Modifier.fillMaxSize(0.7f)
+                            )
+                        }
                         Spacer(modifier = Modifier.height(8.dp))
-                        Text(mode.name, style = MaterialTheme.typography.bodyLarge)
+                        Text(
+                            text = if (isEnabled) mode.name else "${mode.name}（即將推出）",
+                            style = MaterialTheme.typography.bodyLarge
+                        )
                     }
                 }
             }

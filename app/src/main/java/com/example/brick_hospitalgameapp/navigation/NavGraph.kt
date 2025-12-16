@@ -1,146 +1,138 @@
 package com.example.brick_hospitalgameapp.navigation
 
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.Color
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.example.brick_hospitalgameapp.models.UserProfile
-import com.example.brick_hospitalgameapp.screens.ConnectingScreen
-import com.example.brick_hospitalgameapp.screens.GameScreen
-import com.example.brick_hospitalgameapp.screens.LevelSelectionScreen
-import com.example.brick_hospitalgameapp.screens.LevelSettingsScreen
 import com.example.brick_hospitalgameapp.screens.LoginScreen
-import com.example.brick_hospitalgameapp.screens.ProfileScreen
-import com.example.brick_hospitalgameapp.ui.screens.GameScreenSingleColor
-import com.example.brick_hospitalgameapp.ui.screens.GameSummaryScreen
-import com.example.brick_hospitalgameapp.ui.screens.GameScreenMultiColor
-import com.example.brick_hospitalgameapp.ui.screens.GameSummaryScreenMultiColor
+import com.example.brick_hospitalgameapp.screens.LevelSettingsScreen
+import com.example.brick_hospitalgameapp.ui.screens.*
+
 @Composable
-fun AppNavGraph(navController: NavHostController, userProfile: UserProfile?) {
+fun AppNavigation(
+    navController: NavHostController,
+    userProfile: UserProfile?
+) {
     NavHost(
         navController = navController,
         startDestination = "login"
     ) {
+        // Login Screen
         composable("login") {
             LoginScreen(navController, userProfile)
         }
 
-        composable("mode_select/{userId}") { backStackEntry ->
+        // Level Selection
+        composable(
+            route = "mode_select/{userId}",
+            arguments = listOf(navArgument("userId") {
+                type = NavType.StringType
+                nullable = true
+            })
+        ) { backStackEntry ->
             val userId = backStackEntry.arguments?.getString("userId")
             LevelSelectionScreen(navController, userProfile, userId)
         }
 
-        composable("level_settings/{levelName}/{userId}") { backStackEntry ->
-            val levelName = backStackEntry.arguments?.getString("levelName") ?: "關卡1"
-            val userId = backStackEntry.arguments?.getString("userId")
-            LevelSettingsScreen(navController, levelName, userProfile, userId)
-        }
-
-        composable("connecting_screen/{levelName}/{userId}") { backStackEntry ->
-            val levelName = backStackEntry.arguments?.getString("levelName") ?: "關卡1"
-            val userId = backStackEntry.arguments?.getString("userId")
-            ConnectingScreen(navController, levelName, userProfile, userId)
-        }
-
-        composable("game/{levelName}/{userId}") { backStackEntry ->
-            val levelName = backStackEntry.arguments?.getString("levelName") ?: "關卡1"
-            val userId = backStackEntry.arguments?.getString("userId")
-            GameScreen(navController, levelName, userProfile, userId)
-        }
-
-        composable("game_single_color/{levelName}/{userId}") { backStackEntry ->
-            val levelName = backStackEntry.arguments?.getString("levelName") ?: "關卡1"
-            val userId = backStackEntry.arguments?.getString("userId")
-            GameScreenSingleColor(
-                navController = navController,
-                userProfile = userProfile,
-                mockUserId = userId
-            )
-        }
-
+        // 關卡一設定頁（顏色遊戲）
         composable(
-            "game_multi_color/{levelName}/{userId}/{colorMode}",
+            route = "level_settings/{levelName}/{mockUserId}",
             arguments = listOf(
                 navArgument("levelName") { type = NavType.StringType },
-                navArgument("userId") { type = NavType.StringType; nullable = true },
-                navArgument("colorMode") { type = NavType.StringType }
+                navArgument("mockUserId") { type = NavType.StringType; nullable = true }
             )
         ) { backStackEntry ->
             val levelName = backStackEntry.arguments?.getString("levelName") ?: "關卡1"
-            val userId = backStackEntry.arguments?.getString("userId")
-            val colorMode = backStackEntry.arguments?.getString("colorMode") ?: "固定顏色"
-
-            GameScreenMultiColor(
-                navController = navController,
-                userProfile = userProfile,
-                mockUserId = userId,
-                levelName = levelName,
-                colorMode = colorMode
-            )
+            val mockUserId = backStackEntry.arguments?.getString("mockUserId")
+            LevelSettingsScreen(navController, levelName, userProfile, mockUserId)
         }
 
-
+        // 關卡二設定頁（形狀遊戲）
         composable(
-            route = "game_summary/{correct}/{wrong}/{totalTime}/{levelName}/{userId}",
-            arguments = listOf(
-                navArgument("correct") { type = NavType.IntType },
-                navArgument("wrong") { type = NavType.IntType },
-                navArgument("totalTime") { type = NavType.IntType },
-                navArgument("levelName") { type = NavType.StringType },
-                navArgument("userId") { type = NavType.StringType; nullable = true }
-            )
+            route = "level_two_settings/{userId}",
+            arguments = listOf(navArgument("userId") { type = NavType.StringType })
         ) { backStackEntry ->
-            val correct = backStackEntry.arguments?.getInt("correct") ?: 0
-            val wrong = backStackEntry.arguments?.getInt("wrong") ?: 0
-            val totalTime = backStackEntry.arguments?.getInt("totalTime") ?: 0
-            val levelName = backStackEntry.arguments?.getString("levelName") ?: "關卡1"
-            val mockUserId = backStackEntry.arguments?.getString("userId") ?: "guest"
-
-            GameSummaryScreen(
-                navController = navController,
-                correctCount = correct,
-                wrongCount = wrong,
-                totalTime = totalTime,
-                levelName = levelName,
-                mockUserId = mockUserId
-            )
+            val userId = backStackEntry.arguments?.getString("userId") ?: "mock_user"
+            LevelSettingsShapesScreen(navController, userId, userProfile)
         }
 
-
+        // 關卡一顏色遊戲
         composable(
-            route = "game_summary_multi_color/{levelName}/{mockUserId}/{totalTimeSeconds}",
+            route = "game_single_color/{levelName}/{mockUserId}/{totalTimeSeconds}",
             arguments = listOf(
                 navArgument("levelName") { type = NavType.StringType },
                 navArgument("mockUserId") { type = NavType.StringType; nullable = true },
                 navArgument("totalTimeSeconds") { type = NavType.IntType }
             )
         ) { backStackEntry ->
-            val levelName = backStackEntry.arguments?.getString("levelName") ?: "Unknown Level"
-            val mockUserId = backStackEntry.arguments?.getString("mockUserId") ?: "mock_user"
+            val levelName = backStackEntry.arguments?.getString("levelName") ?: "關卡1"
+            val mockUserId = backStackEntry.arguments?.getString("mockUserId")
             val totalTime = backStackEntry.arguments?.getInt("totalTimeSeconds") ?: 60
-
-            // 從 savedStateHandle 取分數/失誤 Map
-            val scoreMap = navController.previousBackStackEntry?.savedStateHandle?.get<Map<Color, Int>>("scoreMap") ?: emptyMap()
-            val mistakesMap = navController.previousBackStackEntry?.savedStateHandle?.get<Map<Color, Int>>("mistakesMap") ?: emptyMap()
-
-            GameSummaryScreenMultiColor(
-                navController = navController,
-                totalTime = totalTime,
-                //scoreMap = scoreMap,
-                //mistakesMap = mistakesMap,
-                levelName = levelName,
-                mockUserId = mockUserId,
-                //correctCount = scoreMap.values.sum(),
-                //wrongCount = mistakesMap.values.sum()
-            )
+            GameScreenSingleColor(navController, userProfile, mockUserId, levelName, totalTime)
         }
 
+        // 關卡二形狀遊戲 - 單色
+        composable(
+            route = "game_shapes_single/{levelName}/{mockUserId}/{totalTimeSeconds}",
+            arguments = listOf(
+                navArgument("levelName") { type = NavType.StringType },
+                navArgument("mockUserId") { type = NavType.StringType; nullable = true },
+                navArgument("totalTimeSeconds") { type = NavType.IntType }
+            )
+        ) { backStackEntry ->
+            val levelName = backStackEntry.arguments?.getString("levelName") ?: "關卡2"
+            val mockUserId = backStackEntry.arguments?.getString("mockUserId")
+            val totalTime = backStackEntry.arguments?.getInt("totalTimeSeconds") ?: 60
+            GameScreenShapesSingle(navController, levelName, mockUserId ?: "", totalTime, userProfile)
+        }
 
-        composable("profile_screen") {
-            ProfileScreen(navController, userProfile)
+        // 關卡二形狀遊戲 - 多色
+        composable(
+            route = "game_shapes_multi/{levelName}/{mockUserId}/{colorMode}",
+            arguments = listOf(
+                navArgument("levelName") { type = NavType.StringType },
+                navArgument("mockUserId") { type = NavType.StringType; nullable = true },
+                navArgument("colorMode") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val levelName = backStackEntry.arguments?.getString("levelName") ?: "關卡2"
+            val mockUserId = backStackEntry.arguments?.getString("mockUserId")
+            val colorMode = backStackEntry.arguments?.getString("colorMode") ?: "sequence"
+            val totalTime = 60
+            GameScreenShapesMultiColor(navController, levelName, mockUserId, totalTime, colorMode)
+        }
+
+        // 關卡一顏色遊戲結算
+        composable(
+            route = "game_summary_color/{levelName}/{mockUserId}/{totalTimeSeconds}",
+            arguments = listOf(
+                navArgument("levelName") { type = NavType.StringType },
+                navArgument("mockUserId") { type = NavType.StringType; nullable = true },
+                navArgument("totalTimeSeconds") { type = NavType.IntType }
+            )
+        ) { backStackEntry ->
+            val levelName = backStackEntry.arguments?.getString("levelName") ?: ""
+            val mockUserId = backStackEntry.arguments?.getString("mockUserId")
+            val totalTime = backStackEntry.arguments?.getInt("totalTimeSeconds") ?: 60
+            GameSummaryShapesScreen(navController, levelName, mockUserId, totalTime)
+        }
+
+        // 關卡二形狀遊戲結算
+        composable(
+            route = "game_summary_shapes/{levelName}/{mockUserId}/{totalTimeSeconds}",
+            arguments = listOf(
+                navArgument("levelName") { type = NavType.StringType },
+                navArgument("mockUserId") { type = NavType.StringType; nullable = true },
+                navArgument("totalTimeSeconds") { type = NavType.IntType }
+            )
+        ) { backStackEntry ->
+            val levelName = backStackEntry.arguments?.getString("levelName") ?: ""
+            val mockUserId = backStackEntry.arguments?.getString("mockUserId")
+            val totalTime = backStackEntry.arguments?.getInt("totalTimeSeconds") ?: 60
+            GameSummaryShapesScreen(navController, levelName, mockUserId, totalTime)
         }
     }
 }
