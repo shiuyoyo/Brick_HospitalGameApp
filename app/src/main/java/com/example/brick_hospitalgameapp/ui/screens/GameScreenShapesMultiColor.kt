@@ -21,6 +21,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.brick_hospitalgameapp.models.UserProfile
 import com.example.brick_hospitalgameapp.ui.shapes.DefaultShapesList
 import com.example.brick_hospitalgameapp.utils.getColorName
 import kotlinx.coroutines.delay
@@ -33,7 +34,8 @@ fun GameScreenShapesMultiColor(
     levelName: String,
     mockUserId: String?,
     totalTimeSeconds: Int = 60,
-    colorMode: String = "sequence"
+    colorMode: String = "sequence",
+    userProfile: UserProfile?
 ) {
     val context = LocalContext.current
     val colors = listOf(Color.Red, Color.Yellow, Color.Blue, Color.Green)

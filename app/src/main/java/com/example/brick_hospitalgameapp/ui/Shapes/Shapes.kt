@@ -16,9 +16,12 @@ val GenericShapeHexagon = GenericShape { size, _ ->
     close()
 }
 
-// 長矩形
+// 長矩形 (寬比高長)
 val GenericShapeRectangle = GenericShape { size, _ ->
-    addRect(androidx.compose.ui.geometry.Rect(0f, 0f, size.width, size.height))
+    // 寬度比高度長 2:1
+    val rectHeight = size.height
+    val rectWidth = size.width
+    addRect(androidx.compose.ui.geometry.Rect(0f, 0f, rectWidth* 0.7f, rectHeight ))
 }
 
 // 正三角形

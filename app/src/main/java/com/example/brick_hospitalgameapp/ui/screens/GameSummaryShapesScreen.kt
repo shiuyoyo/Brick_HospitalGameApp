@@ -25,7 +25,10 @@ fun GameSummaryShapesScreen(
     navController: NavController,
     levelName: String,
     mockUserId: String?,
-    totalTimeSeconds: Int
+    totalTimeSeconds: Int,
+    totalTime: Int,
+    scoreMap: Map<Color, Int>,
+    mistakesMap: Map<Color, Int>
 ) {
     val context = LocalContext.current
 
@@ -169,7 +172,7 @@ fun GameSummaryShapesScreen(
                     modifier = Modifier
                         .size(120.dp)
                         .clickable {
-                            navController.navigate("level_settings/$levelName/$mockUserId") {
+                            navController.navigate("level_settings_shapes/$levelName/$mockUserId") {
                                 popUpTo("game_summary_shapes/$levelName/$mockUserId/$totalTimeSeconds") {
                                     inclusive = true
                                 }
@@ -180,13 +183,13 @@ fun GameSummaryShapesScreen(
                 // 返回關卡選擇按鈕
                 Image(
                     painter = painterResource(
-                        id = context.resources.getIdentifier("btn_back", "drawable", context.packageName)
+                        id = context.resources.getIdentifier("btn_restart", "drawable", context.packageName)
                     ),
                     contentDescription = "返回關卡選擇",
                     modifier = Modifier
                         .size(120.dp)
                         .clickable {
-                            navController.navigate("level_selection/$mockUserId") {
+                            navController.navigate("mode_select/$mockUserId") {
                                 popUpTo("game_summary_shapes/$levelName/$mockUserId/$totalTimeSeconds") {
                                     inclusive = true
                                 }

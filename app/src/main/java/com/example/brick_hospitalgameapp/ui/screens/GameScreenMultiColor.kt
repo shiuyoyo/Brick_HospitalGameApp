@@ -22,6 +22,7 @@ import androidx.navigation.NavController
 import com.example.brick_hospitalgameapp.models.UserProfile
 import kotlinx.coroutines.delay
 import kotlin.random.Random
+import com.example.brick_hospitalgameapp.ui.screens.GameSummaryScreenMultiColor
 
 // GameScreenMultiColor.kt
 @SuppressLint("DiscouragedApi")

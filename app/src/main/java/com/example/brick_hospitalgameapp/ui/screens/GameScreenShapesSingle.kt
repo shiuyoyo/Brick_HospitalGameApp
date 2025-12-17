@@ -30,7 +30,7 @@ import kotlinx.coroutines.delay
 fun GameScreenShapesSingle(
     navController: NavController,
     levelName: String,
-    mockUserId: String,
+    mockUserId: String?,
     totalTimeSeconds: Int = 60,
     userProfile: UserProfile?
 ) {
@@ -82,36 +82,45 @@ fun GameScreenShapesSingle(
             modifier = Modifier.fillMaxSize()
         )
 
-        Row(modifier = Modifier.fillMaxSize().padding(20.dp)) {
+        Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(top = 60.dp, start = 20.dp, end = 0.dp) // 上方增加 40.dp 空間
+                .offset( y = 20.dp), // 或使用 offset 讓整個 Row 往下 20.dp
+
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
             // 左側：5x3 形狀網格
             Column(modifier = Modifier.weight(1f)) {
                 LazyVerticalGrid(
-                    columns = GridCells.Fixed(5), // 5個一排
+                    columns = GridCells.Fixed(5),
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(40.dp),
+                    verticalArrangement = Arrangement.spacedBy(60.dp),
                     contentPadding = PaddingValues(16.dp)
                 ) {
                     itemsIndexed(shapes) { index, shape ->
                         val isActive = index == currentIndex
 
+
+                        // 顏色示範：保持單色紅色，也可以依照 index 自行改變
+                        val boxColor = if (isActive) Color.Red.copy(alpha = 0.5f) else Color.White
+
                         Box(
                             modifier = Modifier
-                                .aspectRatio(1f) // 保持正方形
+                                .aspectRatio(1f)
                                 .clip(shape)
-                                .background(if (isActive) color.copy(alpha = 0.5f) else Color.LightGray)
+                                .background(boxColor)
                                 .border(
                                     width = if (isActive) 3.dp else 1.dp,
-                                    color = if (isActive) color else Color.Gray,
+                                    color = if (isActive) Color.Red else Color.Gray,
                                     shape = shape
                                 )
                                 .clickable(enabled = !gameEnded) {
                                     if (isActive) {
                                         scoreMap[color] = (scoreMap[color] ?: 0) + 1
                                         currentIndex += 1
-                                        if (currentIndex >= shapes.size) {
-                                            gameEnded = true
-                                        }
+                                        if (currentIndex >= shapes.size) gameEnded = true
                                     } else {
                                         mistakesMap[color] = (mistakesMap[color] ?: 0) + 1
                                     }
@@ -120,6 +129,7 @@ fun GameScreenShapesSingle(
                         ) {}
                     }
                 }
+
             }
 
             Spacer(modifier = Modifier.width(16.dp))

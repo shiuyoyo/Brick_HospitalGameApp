@@ -17,14 +17,15 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import androidx.navigation.NavHostController
 import com.example.brick_hospitalgameapp.models.ModeData
 import com.example.brick_hospitalgameapp.models.UserProfile
 
 @Composable
 fun LevelSelectionScreen(
-    navController: NavController,
-    userProfile: UserProfile?,
-    mockUserId: String?
+    navController: NavHostController,
+    userProfile: UserProfile?,    // 確保傳入 userProfile
+    mockUserId: String?           // 新增 mockUserId
 ) {
     val context = LocalContext.current
     val currentUserId = mockUserId ?: "mock_user"

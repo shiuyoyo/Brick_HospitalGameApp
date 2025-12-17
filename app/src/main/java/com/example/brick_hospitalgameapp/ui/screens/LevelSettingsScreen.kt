@@ -142,13 +142,13 @@ fun LevelSettingsScreen(
 
                         when (selectedColorMode) {
                             "固定顏色" -> {
-                                navController.navigate("game_single_color/$levelName/$uid")
+                                navController.navigate("game_single_color/$levelName/$uid/$selectedInterval")
                             }
                             "多色順序" -> {
-                                navController.navigate("game_multi_color/$levelName/$uid/sequence")
+                                navController.navigate("game_multi_color/$levelName/$uid/sequence/$selectedInterval")
                             }
                             "多色隨機" -> {
-                                navController.navigate("game_multi_color/$levelName/$uid/random")
+                                navController.navigate("game_multi_color/$levelName/$uid/random/$selectedInterval")
                             }
                             else -> {
                                 navController.navigate("game_single_color/$levelName/$uid")
