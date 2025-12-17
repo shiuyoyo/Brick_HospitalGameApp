@@ -70,25 +70,36 @@ fun GameSummaryScreenMultiColor(
             Spacer(modifier=Modifier.height(32.dp))
 
             Row(horizontalArrangement = Arrangement.spacedBy(16.dp)){
-                Image(
-                    painter=painterResource(id=context.resources.getIdentifier("btn_end_game","drawable",context.packageName)),
-                    contentDescription="關卡選擇",
-                    modifier=Modifier.size(120.dp).clickable{
-                        navController.navigate("mode_select/$mockUserId"){
-                            popUpTo("game_summary_multi_color/$levelName/$mockUserId/$totalTime"){inclusive=true}
-                        }
-                    }
-                )
 
-                Image(
-                    painter=painterResource(id=context.resources.getIdentifier("btn_restart","drawable",context.packageName)),
-                    contentDescription="重新開始",
-                    modifier=Modifier.size(120.dp).clickable{
-                        navController.navigate("level_settings/$levelName/$mockUserId"){
-                            popUpTo("game_summary_multi_color/$levelName/$mockUserId/$totalTime"){inclusive=true}
+                // 關卡選擇按鈕
+                Button(
+                    onClick = {
+                        navController.navigate("mode_select/$mockUserId") {
+                            popUpTo("game_summary_multi_color/$levelName/$mockUserId/$totalTime") { inclusive = true }
                         }
-                    }
-                )
+                    },
+                    modifier = Modifier
+                        .weight(1f)
+                        .offset(x = 0.dp, y = 0.dp), // 若需要左右微調可改 x
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4F46E5))
+                ) {
+                    Text("關卡選擇", color = Color.White) // 改成黑色文字
+                }
+
+                // 重新開始按鈕
+                Button(
+                    onClick = {
+                        navController.navigate("level_settings/$levelName/$mockUserId") {
+                            popUpTo("game_summary_multi_color/$levelName/$mockUserId/$totalTime") { inclusive = true }
+                        }
+                    },
+                    modifier = Modifier
+                        .weight(1f)
+                        .offset(x = 0.dp, y = 0.dp), // 可微調左右位置
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4F46E5))
+                ) {
+                    Text("重新開始", color = Color.White) // 改成黑色文字
+                }
             }
         }
     }

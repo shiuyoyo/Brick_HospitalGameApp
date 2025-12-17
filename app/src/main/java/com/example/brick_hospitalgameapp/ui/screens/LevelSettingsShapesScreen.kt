@@ -2,6 +2,7 @@ package com.example.brick_hospitalgameapp.ui.screens
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -13,7 +14,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.brick_hospitalgameapp.R
 import com.example.brick_hospitalgameapp.components.PickerSelector
@@ -57,11 +57,28 @@ fun LevelSettingsShapesScreen(
         // 背景
         Image(
             painter = painterResource(
-                id = context.resources.getIdentifier("level_bg", "drawable", context.packageName)
+                id = context.resources.getIdentifier("bg_selectsetting2", "drawable", context.packageName)
             ),
             contentDescription = "背景",
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.Crop
+        )
+
+        // 左上角自定義返回按鈕（圖片）
+        Image(
+            painter = painterResource(
+                id = context.resources.getIdentifier("btn_back", "drawable", context.packageName)
+            ),
+            contentDescription = "返回關卡選擇",
+            modifier = Modifier
+                .size(120.dp)
+                .padding(10.dp)
+                .clickable {
+                    val uid = mockUserId ?: "guest"
+                    navController.navigate("mode_select/$uid") {
+                        popUpTo("level_settings_shapes/$levelName/$uid") { inclusive = true }
+                    }
+                }
         )
 
         Column(
@@ -157,20 +174,20 @@ fun LevelSettingsShapesScreen(
                     Text("開始遊戲", color = Color.White, style = MaterialTheme.typography.titleMedium)
                 }
             }
-
-            // 返回按鈕
-            Button(
-                onClick = {
-                    navController.navigate("level_selection/$mockUserId") {
-                        popUpTo("level_settings_shapes/$levelName/$mockUserId") {
-                            inclusive = true
-                        }
-                    }
-                },
-                colors = ButtonDefaults.buttonColors(containerColor = Color.Gray)
-            ) {
-                Text("返回關卡選擇", color = Color.White)
-            }
+//
+//            // 返回按鈕
+//            Button(
+//                onClick = {
+//                    navController.navigate("mode_select/$mockUserId") {
+//                        popUpTo("level_settings_shapes/$levelName/$mockUserId") {
+//                            inclusive = true
+//                        }
+//                    }
+//                },
+//                colors = ButtonDefaults.buttonColors(containerColor = Color.Gray)
+//            ) {
+//                Text("返回關卡選擇", color = Color.White)
+//            }
         }
     }
 }

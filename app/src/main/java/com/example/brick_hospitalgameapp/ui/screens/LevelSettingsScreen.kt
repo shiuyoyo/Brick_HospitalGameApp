@@ -1,14 +1,13 @@
 package com.example.brick_hospitalgameapp.screens
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -62,6 +61,22 @@ fun LevelSettingsScreen(
             contentScale = ContentScale.Crop
         )
 
+        // 左上角自定義返回按鈕（圖片）
+        Image(
+            painter = painterResource(
+                id = context.resources.getIdentifier("btn_back", "drawable", context.packageName)
+            ),
+            contentDescription = "返回關卡選擇",
+            modifier = Modifier
+                .size(120.dp)
+                .padding(10.dp)
+                .clickable {
+                    val uid = mockUserId ?: "guest"
+                    navController.navigate("mode_select/$uid") {
+                        popUpTo("level_settings/$levelName/$uid") { inclusive = true }
+                    }
+                }
+        )
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -106,7 +121,7 @@ fun LevelSettingsScreen(
 
                 Column(
                     modifier = Modifier.weight(1f),
-                    horizontalAlignment = Alignment.End
+                    horizontalAlignment = Alignment.End,
                 ) {
                     PickerSelector(
                         label = "練習時間(分鐘)",

@@ -40,7 +40,7 @@ fun GameSummaryShapesScreen(
         // 背景圖片
         Image(
             painter = painterResource(
-                id = context.resources.getIdentifier("game_bg", "drawable", context.packageName)
+                id = context.resources.getIdentifier("game_end_muti", "drawable", context.packageName)
             ),
             contentDescription = "背景",
             contentScale = ContentScale.Crop,
@@ -86,7 +86,7 @@ fun GameSummaryShapesScreen(
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp),
+                    .padding(horizontal = 110.dp),
                 colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.9f))
             ) {
                 Column(
@@ -163,39 +163,35 @@ fun GameSummaryShapesScreen(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                // 再玩一次按鈕
-                Image(
-                    painter = painterResource(
-                        id = context.resources.getIdentifier("btn_restart", "drawable", context.packageName)
-                    ),
-                    contentDescription = "再玩一次",
-                    modifier = Modifier
-                        .size(120.dp)
-                        .clickable {
-                            navController.navigate("level_settings_shapes/$levelName/$mockUserId") {
-                                popUpTo("game_summary_shapes/$levelName/$mockUserId/$totalTimeSeconds") {
-                                    inclusive = true
-                                }
-                            }
+                // 關卡選擇按鈕
+                Button(
+                    onClick = {
+                        navController.navigate("mode_select/$mockUserId") {
+                            popUpTo("game_summary_shapes/$levelName/$mockUserId/$totalTimeSeconds") { inclusive = true }
                         }
-                )
+                    },
+                    modifier = Modifier
+                        .weight(1f)
+                        .offset(x = 0.dp, y = 0.dp), // 若需要左右微調可改 x
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4F46E5))
+                ) {
+                    Text("關卡選擇", color = Color.White) // 改成黑色文字
+                }
 
-                // 返回關卡選擇按鈕
-                Image(
-                    painter = painterResource(
-                        id = context.resources.getIdentifier("btn_restart", "drawable", context.packageName)
-                    ),
-                    contentDescription = "返回關卡選擇",
-                    modifier = Modifier
-                        .size(120.dp)
-                        .clickable {
-                            navController.navigate("mode_select/$mockUserId") {
-                                popUpTo("game_summary_shapes/$levelName/$mockUserId/$totalTimeSeconds") {
-                                    inclusive = true
-                                }
-                            }
+                // 重新開始按鈕
+                Button(
+                    onClick = {
+                        navController.navigate("level_settings_shapes/$levelName/$mockUserId") {
+                            popUpTo("game_summary_shapes/$levelName/$mockUserId/$totalTimeSeconds") { inclusive = true }
                         }
-                )
+                    },
+                    modifier = Modifier
+                        .weight(1f)
+                        .offset(x = 0.dp, y = 0.dp), // 可微調左右位置
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4F46E5))
+                ) {
+                    Text("重新開始", color = Color.White) // 改成黑色文字
+                }
             }
         }
     }

@@ -81,7 +81,7 @@ fun GameScreenMultiColor(
     Box(modifier = Modifier.fillMaxSize()) {
         // 背景
         Image(
-            painter = painterResource(id = context.resources.getIdentifier("game_bg","drawable",context.packageName)),
+            painter = painterResource(id = context.resources.getIdentifier("game_bg_shape","drawable",context.packageName)),
             contentDescription = "背景",
             contentScale = ContentScale.Crop,
             modifier = Modifier.fillMaxSize()

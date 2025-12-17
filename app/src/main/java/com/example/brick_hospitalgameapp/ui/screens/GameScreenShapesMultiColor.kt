@@ -86,26 +86,33 @@ fun GameScreenShapesMultiColor(
         // 背景
         Image(
             painter = painterResource(
-                id = context.resources.getIdentifier("game_bg", "drawable", context.packageName)
+                id = context.resources.getIdentifier("game_bg_shape", "drawable", context.packageName)
             ),
             contentDescription = "背景",
             contentScale = ContentScale.Crop,
             modifier = Modifier.fillMaxSize()
         )
 
-        Row(modifier = Modifier.fillMaxSize().padding(20.dp)) {
+        Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(top = 60.dp, start = 20.dp, end = 0.dp) // 上方增加 40.dp 空間
+                .offset( y = 20.dp), // 或使用 offset 讓整個 Row 往下 20.dp
+
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
             // 左側：5x3 形狀網格
             Column(modifier = Modifier.weight(1f)) {
                 LazyVerticalGrid(
                     columns = GridCells.Fixed(5), // 5個一排
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(40.dp),
+                    verticalArrangement = Arrangement.spacedBy(60.dp),
                     contentPadding = PaddingValues(16.dp)
                 ) {
                     itemsIndexed(shapes) { index, shape ->
                         val isActive = index == currentIndex
-                        val shapeColor = if (isActive) activeColor else Color.LightGray
+                        val shapeColor = if (isActive) activeColor.copy(alpha = 0.5f) else Color.White
 
                         Box(
                             modifier = Modifier

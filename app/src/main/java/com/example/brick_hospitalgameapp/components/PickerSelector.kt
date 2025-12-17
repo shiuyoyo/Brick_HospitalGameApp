@@ -22,7 +22,7 @@ fun <T> PickerSelector(
     var showDialog by remember { mutableStateOf(false) }
 
     Column(modifier = modifier) {
-        Text(label, color = Color.White)
+        Text(label, color = Color(0xFF7B8FA6))
         Spacer(modifier = Modifier.height(6.dp))
 
         Box(

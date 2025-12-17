@@ -75,7 +75,7 @@ fun GameScreenShapesSingle(
         // 背景圖片
         Image(
             painter = painterResource(
-                id = context.resources.getIdentifier("game_bg", "drawable", context.packageName)
+                id = context.resources.getIdentifier("game_bg_shape", "drawable", context.packageName)
             ),
             contentDescription = "背景",
             contentScale = ContentScale.Crop,
@@ -225,9 +225,15 @@ fun GameScreenShapesSingle(
 
                 Button(
                     onClick = {
+
+                        // 先 pop current
+                        navController.popBackStack()
+
+                        // 設值給當下 remaining entry（Summary 會是 current）
                         navController.currentBackStackEntry?.savedStateHandle?.set("scoreMap", scoreMap)
                         navController.currentBackStackEntry?.savedStateHandle?.set("mistakesMap", mistakesMap)
 
+                        // 再 navigate 到 Summary
                         navController.navigate("game_summary_shapes/$levelName/$mockUserId/$totalTimeSeconds") {
                             popUpTo("game_shapes_single/$levelName/$mockUserId/$totalTimeSeconds") {
                                 inclusive = true
