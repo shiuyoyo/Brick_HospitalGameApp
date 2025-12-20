@@ -253,5 +253,45 @@ fun AppNavGraph(navController: NavHostController, userProfile: UserProfile?) {
                 totalTimeSeconds = totalTime
             )
         }
+
+        //關卡3
+        composable(
+            route = "level_setting_thin/{mockUserId}",
+            arguments = listOf(navArgument("mockUserId"){ type = NavType.StringType; nullable=true })
+        ) { backStackEntry ->
+            val mockUserId = backStackEntry.arguments?.getString("mockUserId")
+            LevelSettingsThinScreen(
+                navController = navController,
+                userProfile = userProfile,
+                mockUserId = mockUserId
+            )
+        }
+
+        composable(
+            route = "game_thin_circle/{levelName}/{mockUserId}/{totalTimeSeconds}",
+            arguments = listOf(
+                navArgument("levelName") { type = NavType.StringType },
+                navArgument("mockUserId") { type = NavType.StringType; nullable = true },
+                navArgument("totalTimeSeconds") { type = NavType.IntType }
+            )
+        ) { backStackEntry ->
+            val levelName = backStackEntry.arguments?.getString("levelName") ?: "關卡3"
+            val mockUserId = backStackEntry.arguments?.getString("mockUserId")
+            val totalTime = backStackEntry.arguments?.getInt("totalTimeSeconds") ?: 60
+            val scoreMap =
+                navController.previousBackStackEntry?.savedStateHandle?.get<Map<Color, Int>>("scoreMap") ?: emptyMap()
+            val mistakesMap =
+                navController.previousBackStackEntry?.savedStateHandle?.get<Map<Color, Int>>("mistakesMap") ?: emptyMap()
+
+            GameScreenThinCircle(
+                navController = navController,
+                levelName = levelName,
+                mockUserId = mockUserId,
+                totalTimeSeconds = totalTime,
+                scoreMap = scoreMap,
+                mistakesMap = mistakesMap,
+            )
+        }
+
     }
 }

@@ -55,7 +55,7 @@ fun LevelSelectionScreen(
             verticalAlignment = Alignment.CenterVertically
         ) {
             modes.forEach { mode ->
-                val isEnabled = mode.name != "關卡3" // 關卡三暫時沒有
+                val isEnabled = mode.name != "關卡4" // 關卡三暫時沒有
                 val boxModifier = Modifier
                     .weight(1f)
                     .aspectRatio(1f)
@@ -72,6 +72,10 @@ fun LevelSelectionScreen(
                                     "關卡2" -> {
                                         // 導航到形狀遊戲的設定頁面
                                         navController.navigate("level_settings_shapes/形狀遊戲/$currentUserId")
+                                    }
+                                    "關卡3" -> {
+                                        // 導航到 Thin Circle 遊戲的設定頁面
+                                        navController.navigate("level_setting_thin/$currentUserId")
                                     }
                                 }
                             }

@@ -1,0 +1,169 @@
+package com.example.brick_hospitalgameapp.ui.screens
+
+import android.annotation.SuppressLint
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import com.example.brick_hospitalgameapp.R
+import com.example.brick_hospitalgameapp.components.PickerSelector
+import com.example.brick_hospitalgameapp.models.UserProfile
+
+@SuppressLint("DiscouragedApi")
+@Composable
+fun LevelSettingsThinScreen(
+    navController: NavController,
+    userProfile: UserProfile?,
+    mockUserId: String?,
+    levelName: String = "關卡3"
+) {
+    val context = LocalContext.current
+    val currentUserId = userProfile?.id ?: mockUserId ?: "guest"
+
+    // 下拉選單資料
+    val practiceTimes = listOf(3, 5, 10, 15, 20, 25, 30)
+    val intervalTimes = listOf(5, 10, 15, 20, 25)
+
+    var selectedPracticeTime by remember { mutableStateOf(20) }
+    var selectedInterval by remember { mutableStateOf(20) }
+
+    // 難度星數計算（示例）
+    val stars by remember(selectedInterval) {
+        mutableStateOf(
+            when (selectedInterval) {
+                25 -> 1
+                20 -> 2
+                15 -> 3
+                10 -> 4
+                5 -> 5
+                else -> 2
+            }
+        )
+    }
+
+    Box(modifier = Modifier.fillMaxSize()) {
+        // 背景
+        Image(
+            painter = painterResource(
+                id = context.resources.getIdentifier("bg_selectsetting3", "drawable", context.packageName)
+            ),
+            contentDescription = "背景",
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.Crop
+        )
+
+        // 左上角自定義返回按鈕（圖片）
+        Image(
+            painter = painterResource(
+                id = context.resources.getIdentifier("btn_back", "drawable", context.packageName)
+            ),
+            contentDescription = "返回關卡選擇",
+            modifier = Modifier
+                .size(120.dp)
+                .padding(10.dp)
+                .clickable {
+                    val uid = mockUserId ?: "guest"
+                    navController.navigate("mode_select/$uid") {
+                        popUpTo("level_setting_thin/$uid") { inclusive = true }
+                    }
+                }
+        )
+
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(start = 76.dp, top = 120.dp, end = 170.dp, bottom = 24.dp)
+        ) {
+            Text(
+                "關卡設定 - $levelName",
+                style = MaterialTheme.typography.headlineLarge,
+                color = Color.White
+            )
+            Spacer(modifier = Modifier.height(24.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(24.dp)
+            ) {
+                // 左側星數說明
+                Column(
+                    modifier = Modifier.weight(1f),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text("難度星星", color = Color.White, style = MaterialTheme.typography.titleMedium)
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Row {
+                        repeat(stars) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.ic_star),
+                                contentDescription = "Star",
+                                tint = Color(0xFFFFD700),
+                                modifier = Modifier.size(36.dp)
+                            )
+                        }
+                        repeat(5 - stars) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.ic_star_border),
+                                contentDescription = "Empty Star",
+                                tint = Color.Gray,
+                                modifier = Modifier.size(36.dp)
+                            )
+                        }
+                    }
+                }
+
+                // 右側下拉選單區
+                Column(
+                    modifier = Modifier.weight(1f),
+                    horizontalAlignment = Alignment.End
+                ) {
+                    PickerSelector(
+                        label = "練習時間(分鐘)",
+                        options = practiceTimes,
+                        selected = selectedPracticeTime,
+                        onSelect = { selectedPracticeTime = it },
+                        modifier = Modifier.padding(bottom = 16.dp)
+                    )
+
+                    PickerSelector(
+                        label = "圖形間隔時間(秒)",
+                        options = intervalTimes,
+                        selected = selectedInterval,
+                        onSelect = { selectedInterval = it },
+                        modifier = Modifier.padding(bottom = 16.dp)
+                    )
+
+                }
+            }
+
+            Spacer(modifier = Modifier.height(32.dp))
+
+            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterEnd) {
+                Button(
+                    onClick = {
+                        navController.navigate(
+                            "game_thin_circle/$levelName/$currentUserId/$selectedPracticeTime"
+                        )
+                    },
+                    modifier = Modifier.width(200.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4F46E5)),
+                    shape = RoundedCornerShape(16.dp)
+                ) {
+                    Text("開始遊戲", color = Color.White, style = MaterialTheme.typography.titleMedium)
+                }
+            }
+
+        }
+    }
+}
+
