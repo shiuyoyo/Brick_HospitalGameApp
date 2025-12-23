@@ -6,9 +6,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -23,237 +20,215 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.brick_hospitalgameapp.models.UserProfile
 import com.example.brick_hospitalgameapp.ui.shapes.DefaultShapesList
+import com.example.brick_hospitalgameapp.ui.utils.drawableIdByName
 import kotlinx.coroutines.delay
+import kotlin.math.max
 
 @SuppressLint("DiscouragedApi")
 @Composable
 fun GameScreenShapesSingle(
     navController: NavController,
-    levelName: String,
+    userProfile: UserProfile?,
     mockUserId: String?,
-    totalTimeSeconds: Int = 60,
-    userProfile: UserProfile?
+    levelName: String = "關卡2",
+    practiceMinutes: Int = 20,
+    intervalSeconds: Int = 20
 ) {
     val context = LocalContext.current
-    val color = Color.Red
+    val uid = userProfile?.id ?: mockUserId ?: "guest"
 
-    // 創建15個形狀（3行5列）
-    val shapes = remember {
-        List(15) { index ->
-            DefaultShapesList[index % DefaultShapesList.size]
-        }
-    }
+    // A 方案 drawable 防呆
+    val bgId = remember { drawableIdByName(context, "game_bg_shape") }
+    val restartId = remember { drawableIdByName(context, "btn_restart") }
+    val endId = remember { drawableIdByName(context, "btn_end_game") }
 
-    var scoreMap by remember { mutableStateOf(mutableMapOf(color to 0)) }
-    var mistakesMap by remember { mutableStateOf(mutableMapOf(color to 0)) }
+    // 3x5 = 15 shapes
+    val shapes = remember { List(15) { DefaultShapesList[it % DefaultShapesList.size] } }
+    val activeColor = Color.Red
+
+    // 分數（只用紅色一個 key，維持你 summary 使用 scoreMap/mistakesMap 的格式）
+    var scoreMap by remember { mutableStateOf(mutableMapOf(activeColor to 0)) }
+    var mistakesMap by remember { mutableStateOf(mutableMapOf(activeColor to 0)) }
+
     var elapsedTime by remember { mutableStateOf(0) }
     var currentIndex by remember { mutableStateOf(0) }
     var gameEnded by remember { mutableStateOf(false) }
 
-    val intervalMs = totalTimeSeconds * 1000 / shapes.size
+    val totalTimeSeconds = max(1, practiceMinutes * 60)
+    val intervalMs = max(1, intervalSeconds) * 1000L
 
-    // 自動下一格
-    LaunchedEffect(currentIndex) {
-        if (currentIndex < shapes.size && !gameEnded) {
-            delay(intervalMs.toLong())
-            mistakesMap[color] = (mistakesMap[color] ?: 0) + 1
-            currentIndex += 1
-            if (currentIndex >= shapes.size) {
-                gameEnded = true
-                navController.currentBackStackEntry?.savedStateHandle?.set("scoreMap", scoreMap)
-                navController.currentBackStackEntry?.savedStateHandle?.set("mistakesMap", mistakesMap)
-                navController.navigate("game_summary_shapes/$levelName/$mockUserId/$totalTimeSeconds") {
-                    popUpTo("game_shapes_single/$levelName/$mockUserId/$totalTimeSeconds") {
-                        inclusive = true
-                    }
-                }
-            }
+    fun finishAndGoSummary() {
+        if (gameEnded) return
+        gameEnded = true
+
+        // 存到上一頁 entry，避免 popUpTo inclusive 讓 summary 取不到
+        val target = navController.previousBackStackEntry ?: navController.currentBackStackEntry
+        target?.savedStateHandle?.set("scoreMap", HashMap(scoreMap))
+        target?.savedStateHandle?.set("mistakesMap", HashMap(mistakesMap))
+
+        // 傳「實際花費時間 elapsedTime」
+        navController.navigate("game_summary_shapes/$levelName/$uid/$elapsedTime") {
+            popUpTo("game_shapes_single/$levelName/$uid/$practiceMinutes/$intervalSeconds") { inclusive = true }
         }
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        // 背景圖片
-        Image(
-            painter = painterResource(
-                id = context.resources.getIdentifier("game_bg_shape", "drawable", context.packageName)
-            ),
-            contentDescription = "背景",
-            contentScale = ContentScale.Crop,
-            modifier = Modifier.fillMaxSize()
-        )
-
-        Row(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(top = 60.dp, start = 20.dp, end = 0.dp) // 上方增加 40.dp 空間
-                .offset( y = 20.dp), // 或使用 offset 讓整個 Row 往下 20.dp
-
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            // 左側：5x3 形狀網格
-            Column(modifier = Modifier.weight(1f)) {
-                LazyVerticalGrid(
-                    columns = GridCells.Fixed(5),
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(40.dp),
-                    verticalArrangement = Arrangement.spacedBy(60.dp),
-                    contentPadding = PaddingValues(16.dp)
-                ) {
-                    itemsIndexed(shapes) { index, shape ->
-                        val isActive = index == currentIndex
-
-
-                        // 顏色示範：保持單色紅色，也可以依照 index 自行改變
-                        val boxColor = if (isActive) Color.Red.copy(alpha = 0.5f) else Color.White
-
-                        Box(
-                            modifier = Modifier
-                                .aspectRatio(1f)
-                                .clip(shape)
-                                .background(boxColor)
-                                .border(
-                                    width = if (isActive) 3.dp else 1.dp,
-                                    color = if (isActive) Color.Red else Color.Gray,
-                                    shape = shape
-                                )
-                                .clickable(enabled = !gameEnded) {
-                                    if (isActive) {
-                                        scoreMap[color] = (scoreMap[color] ?: 0) + 1
-                                        currentIndex += 1
-                                        if (currentIndex >= shapes.size) gameEnded = true
-                                    } else {
-                                        mistakesMap[color] = (mistakesMap[color] ?: 0) + 1
-                                    }
-                                },
-                            contentAlignment = Alignment.Center
-                        ) {}
-                    }
-                }
-
-            }
-
-            Spacer(modifier = Modifier.width(16.dp))
-
-            // 右側：資訊欄
-            Column(
-                modifier = Modifier.width(200.dp),
-                verticalArrangement = Arrangement.Top,
-                horizontalAlignment = Alignment.Start
-            ) {
-                Text(
-                    text = levelName,
-                    color = Color.Black,
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontSize = 18.sp
-                )
-
-                Spacer(modifier = Modifier.height(20.dp))
-
-                Text(
-                    text = "時間: ${elapsedTime}s",
-                    color = Color.Black,
-                    fontSize = 16.sp
-                )
-
-                Spacer(modifier = Modifier.height(20.dp))
-
-                Text(
-                    text = "進度: ${currentIndex}/${shapes.size}",
-                    color = Color.Black,
-                    fontSize = 16.sp
-                )
-
-                Spacer(modifier = Modifier.height(20.dp))
-
-                // 當前提示
-                if (!gameEnded) {
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = CardDefaults.cardColors(
-                            containerColor = color.copy(alpha = 0.3f)
-                        )
-                    ) {
-                        Text(
-                            text = "點擊紅色\n高亮的形狀",
-                            color = Color.Black,
-                            fontSize = 16.sp,
-                            modifier = Modifier.padding(16.dp)
-                        )
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(20.dp))
-
-                // 分數統計
-                Text(
-                    text = "分數統計:",
-                    color = Color.Black,
-                    fontSize = 16.sp,
-                    style = MaterialTheme.typography.bodyMedium
-                )
-
-                Text(
-                    text = "正確: ${scoreMap[color]}",
-                    color = Color.Green,
-                    fontSize = 14.sp
-                )
-
-                Text(
-                    text = "錯誤: ${mistakesMap[color]}",
-                    color = Color.Red,
-                    fontSize = 14.sp
-                )
-
-                Spacer(modifier = Modifier.height(30.dp))
-
-                // 控制按鈕
-                Button(
-                    onClick = {
-                        navController.navigate("level_settings_shapes/$levelName/$mockUserId") {
-                            popUpTo("game_shapes_single/$levelName/$mockUserId/$totalTimeSeconds") {
-                                inclusive = true
-                            }
-                        }
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color.Blue)
-                ) {
-                    Text("重新開始", color = Color.White)
-                }
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                Button(
-                    onClick = {
-
-                        // 先 pop current
-                        navController.popBackStack()
-
-                        // 設值給當下 remaining entry（Summary 會是 current）
-                        navController.currentBackStackEntry?.savedStateHandle?.set("scoreMap", scoreMap)
-                        navController.currentBackStackEntry?.savedStateHandle?.set("mistakesMap", mistakesMap)
-
-                        // 再 navigate 到 Summary
-                        navController.navigate("game_summary_shapes/$levelName/$mockUserId/$totalTimeSeconds") {
-                            popUpTo("game_shapes_single/$levelName/$mockUserId/$totalTimeSeconds") {
-                                inclusive = true
-                            }
-                        }
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
-                ) {
-                    Text("結束遊戲", color = Color.White)
-                }
-            }
-        }
-    }
-
-    // 計時器
+    // 總時間計時
     LaunchedEffect(Unit) {
         while (!gameEnded) {
             delay(1000)
             elapsedTime += 1
+            if (elapsedTime >= totalTimeSeconds) {
+                finishAndGoSummary()
+            }
+        }
+    }
+
+    // 每 intervalSeconds 自動跳格：沒點到算一次錯
+    LaunchedEffect(currentIndex) {
+        if (!gameEnded) {
+            delay(intervalMs)
+            mistakesMap[activeColor] = (mistakesMap[activeColor] ?: 0) + 1
+            currentIndex += 1
+            if (currentIndex >= shapes.size) currentIndex = 0 // 循環
+        }
+    }
+
+    Box(modifier = Modifier.fillMaxSize()) {
+
+        // 背景
+        if (bgId != 0) {
+            Image(
+                painter = painterResource(bgId),
+                contentDescription = "背景",
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize()
+            )
+        } else {
+            Box(Modifier.fillMaxSize().background(Color.White))
+        }
+
+        Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(top = 60.dp, start = 20.dp, end = 0.dp)
+                .offset(y = 20.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+
+            // 左側：固定 3x5（不用 LazyVerticalGrid）
+            Column(modifier = Modifier.weight(1f)) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(60.dp)
+                ) {
+                    for (row in 0 until 3) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(40.dp)
+                        ) {
+                            for (col in 0 until 5) {
+                                val index = row * 5 + col
+                                val shape = shapes[index]
+                                val isActive = index == currentIndex
+
+                                Box(
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .aspectRatio(1f)
+                                        .clip(shape)
+                                        .background(if (isActive) activeColor.copy(alpha = 0.5f) else Color.White)
+                                        .border(
+                                            width = if (isActive) 3.dp else 1.dp,
+                                            color = if (isActive) activeColor else Color.Gray,
+                                            shape = shape
+                                        )
+                                        .clickable(enabled = !gameEnded) {
+                                            if (isActive) {
+                                                scoreMap[activeColor] = (scoreMap[activeColor] ?: 0) + 1
+                                                currentIndex += 1
+                                                if (currentIndex >= shapes.size) currentIndex = 0
+                                            } else {
+                                                mistakesMap[activeColor] = (mistakesMap[activeColor] ?: 0) + 1
+                                            }
+                                        }
+                                ) {}
+                            }
+                        }
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.width(16.dp))
+
+            // 右側：資訊欄 + 控制
+            Column(
+                modifier = Modifier.width(180.dp),
+                verticalArrangement = Arrangement.Top,
+                horizontalAlignment = Alignment.Start
+            ) {
+                Text(levelName, color = Color.Black, fontSize = 18.sp, style = MaterialTheme.typography.headlineSmall)
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Text("時間: ${elapsedTime} / ${totalTimeSeconds}s", color = Color.Black, fontSize = 16.sp)
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Text("間隔: ${intervalSeconds}s", color = Color.Black, fontSize = 16.sp)
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Text("正確: ${scoreMap[activeColor] ?: 0}", color = Color(0xFF2E7D32), fontSize = 16.sp)
+                Text("錯誤: ${mistakesMap[activeColor] ?: 0}", color = Color(0xFFC62828), fontSize = 16.sp)
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                // 重新開始
+                if (restartId != 0) {
+                    Image(
+                        painter = painterResource(restartId),
+                        contentDescription = "重新開始",
+                        modifier = Modifier
+                            .size(120.dp)
+                            .clickable {
+                                navController.navigate("level_settings_shapes/$levelName/$uid") {
+                                    popUpTo("game_shapes_single/$levelName/$uid/$practiceMinutes/$intervalSeconds") {
+                                        inclusive = true
+                                    }
+                                }
+                            }
+                    )
+                } else {
+                    Button(
+                        onClick = {
+                            navController.navigate("level_settings_shapes/$levelName/$uid") {
+                                popUpTo("game_shapes_single/$levelName/$uid/$practiceMinutes/$intervalSeconds") {
+                                    inclusive = true
+                                }
+                            }
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    ) { Text("重新開始") }
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // 結束遊戲
+                if (endId != 0) {
+                    Image(
+                        painter = painterResource(endId),
+                        contentDescription = "結束遊戲",
+                        modifier = Modifier
+                            .size(120.dp)
+                            .clickable { finishAndGoSummary() }
+                    )
+                } else {
+                    Button(
+                        onClick = { finishAndGoSummary() },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
+                    ) { Text("結束遊戲", color = Color.White) }
+                }
+            }
         }
     }
 }

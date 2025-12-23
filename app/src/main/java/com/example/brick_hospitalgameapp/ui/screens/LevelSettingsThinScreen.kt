@@ -18,6 +18,7 @@ import androidx.navigation.NavController
 import com.example.brick_hospitalgameapp.R
 import com.example.brick_hospitalgameapp.components.PickerSelector
 import com.example.brick_hospitalgameapp.models.UserProfile
+import com.example.brick_hospitalgameapp.ui.utils.drawableIdByName
 
 @SuppressLint("DiscouragedApi")
 @Composable
@@ -28,16 +29,14 @@ fun LevelSettingsThinScreen(
     levelName: String = "關卡3"
 ) {
     val context = LocalContext.current
-    val currentUserId = userProfile?.id ?: mockUserId ?: "guest"
+    val uid = userProfile?.id ?: mockUserId ?: "guest"
 
-    // 下拉選單資料
-    val practiceTimes = listOf(3, 5, 10, 15, 20, 25, 30)
-    val intervalTimes = listOf(5, 10, 15, 20, 25)
+    val practiceTimes = listOf(3, 5, 10, 15, 20, 25, 30) // 分鐘
+    val intervalTimes = listOf(5, 10, 15, 20, 25)        // 秒
 
-    var selectedPracticeTime by remember { mutableStateOf(20) }
-    var selectedInterval by remember { mutableStateOf(20) }
+    var selectedPracticeTime by remember { mutableStateOf(20) } // 分鐘
+    var selectedInterval by remember { mutableStateOf(20) }     // 秒
 
-    // 難度星數計算（示例）
     val stars by remember(selectedInterval) {
         mutableStateOf(
             when (selectedInterval) {
@@ -51,33 +50,34 @@ fun LevelSettingsThinScreen(
         )
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        // 背景
-        Image(
-            painter = painterResource(
-                id = context.resources.getIdentifier("bg_selectsetting3", "drawable", context.packageName)
-            ),
-            contentDescription = "背景",
-            modifier = Modifier.fillMaxSize(),
-            contentScale = ContentScale.Crop
-        )
+    val bgId = remember { drawableIdByName(context, "bg_selectsetting3") }
+    val backId = remember { drawableIdByName(context, "btn_back") }
 
-        // 左上角自定義返回按鈕（圖片）
-        Image(
-            painter = painterResource(
-                id = context.resources.getIdentifier("btn_back", "drawable", context.packageName)
-            ),
-            contentDescription = "返回關卡選擇",
-            modifier = Modifier
-                .size(120.dp)
-                .padding(10.dp)
-                .clickable {
-                    val uid = mockUserId ?: "guest"
-                    navController.navigate("mode_select/$uid") {
-                        popUpTo("level_setting_thin/$uid") { inclusive = true }
+    Box(modifier = Modifier.fillMaxSize()) {
+
+        if (bgId != 0) {
+            Image(
+                painter = painterResource(bgId),
+                contentDescription = "背景",
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop
+            )
+        }
+
+        if (backId != 0) {
+            Image(
+                painter = painterResource(backId),
+                contentDescription = "返回關卡選擇",
+                modifier = Modifier
+                    .size(120.dp)
+                    .padding(10.dp)
+                    .clickable {
+                        navController.navigate("mode_select/$uid") {
+                            popUpTo("level_setting_thin/$uid") { inclusive = true }
+                        }
                     }
-                }
-        )
+            )
+        }
 
         Column(
             modifier = Modifier
@@ -95,7 +95,6 @@ fun LevelSettingsThinScreen(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(24.dp)
             ) {
-                // 左側星數說明
                 Column(
                     modifier = Modifier.weight(1f),
                     horizontalAlignment = Alignment.CenterHorizontally
@@ -122,7 +121,6 @@ fun LevelSettingsThinScreen(
                     }
                 }
 
-                // 右側下拉選單區
                 Column(
                     modifier = Modifier.weight(1f),
                     horizontalAlignment = Alignment.End
@@ -142,7 +140,6 @@ fun LevelSettingsThinScreen(
                         onSelect = { selectedInterval = it },
                         modifier = Modifier.padding(bottom = 16.dp)
                     )
-
                 }
             }
 
@@ -151,9 +148,9 @@ fun LevelSettingsThinScreen(
             Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterEnd) {
                 Button(
                     onClick = {
-                        navController.navigate(
-                            "game_thin_circle/$levelName/$currentUserId/$selectedPracticeTime"
-                        )
+                        val practiceMinutes = selectedPracticeTime
+                        val intervalSeconds = selectedInterval
+                        navController.navigate("game_thin_circle/$levelName/$uid/$practiceMinutes/$intervalSeconds")
                     },
                     modifier = Modifier.width(200.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4F46E5)),
@@ -162,8 +159,6 @@ fun LevelSettingsThinScreen(
                     Text("開始遊戲", color = Color.White, style = MaterialTheme.typography.titleMedium)
                 }
             }
-
         }
     }
 }
-

@@ -18,6 +18,7 @@ import androidx.navigation.NavController
 import com.example.brick_hospitalgameapp.R
 import com.example.brick_hospitalgameapp.components.PickerSelector
 import com.example.brick_hospitalgameapp.models.UserProfile
+import com.example.brick_hospitalgameapp.ui.utils.drawableIdByName
 
 @SuppressLint("DiscouragedApi")
 @Composable
@@ -28,18 +29,16 @@ fun LevelSettingsShapesScreen(
     levelName: String = "關卡2"
 ) {
     val context = LocalContext.current
-    val currentUserId = userProfile?.id ?: mockUserId ?: "guest"
+    val uid = userProfile?.id ?: mockUserId ?: "guest"
 
-    // 下拉選單資料
-    val practiceTimes = listOf(3, 5, 10, 15, 20, 25, 30)
-    val intervalTimes = listOf(5, 10, 15, 20, 25)
+    val practiceTimes = listOf(3, 5, 10, 15, 20, 25, 30) // 分鐘
+    val intervalTimes = listOf(5, 10, 15, 20, 25)        // 秒
     val colorModes = listOf("固定顏色", "多色順序", "多色隨機")
 
-    var selectedPracticeTime by remember { mutableStateOf(20) }
-    var selectedInterval by remember { mutableStateOf(20) }
+    var selectedPracticeTime by remember { mutableStateOf(20) } // 分鐘
+    var selectedInterval by remember { mutableStateOf(20) }     // 秒
     var selectedColorMode by remember { mutableStateOf("固定顏色") }
 
-    // 難度星數計算（示例）
     val stars by remember(selectedInterval, selectedColorMode) {
         mutableStateOf(
             when (selectedInterval) {
@@ -53,33 +52,49 @@ fun LevelSettingsShapesScreen(
         )
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        // 背景
-        Image(
-            painter = painterResource(
-                id = context.resources.getIdentifier("bg_selectsetting2", "drawable", context.packageName)
-            ),
-            contentDescription = "背景",
-            modifier = Modifier.fillMaxSize(),
-            contentScale = ContentScale.Crop
-        )
+    // A 方案 drawable 防呆
+    val bgId = remember { drawableIdByName(context, "bg_selectsetting2") }
+    val backId = remember { drawableIdByName(context, "btn_back") }
 
-        // 左上角自定義返回按鈕（圖片）
-        Image(
-            painter = painterResource(
-                id = context.resources.getIdentifier("btn_back", "drawable", context.packageName)
-            ),
-            contentDescription = "返回關卡選擇",
-            modifier = Modifier
-                .size(120.dp)
-                .padding(10.dp)
-                .clickable {
-                    val uid = mockUserId ?: "guest"
-                    navController.navigate("mode_select/$uid") {
-                        popUpTo("level_settings_shapes/$levelName/$uid") { inclusive = true }
+    Box(modifier = Modifier.fillMaxSize()) {
+
+        // 背景（防呆）
+        if (bgId != 0) {
+            Image(
+                painter = painterResource(bgId),
+                contentDescription = "背景",
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop
+            )
+        }
+
+        // 左上角返回按鈕
+        if (backId != 0) {
+            Image(
+                painter = painterResource(backId),
+                contentDescription = "返回關卡選擇",
+                modifier = Modifier
+                    .size(120.dp)
+                    .padding(10.dp)
+                    .clickable {
+                        navController.navigate("mode_select/$uid") {
+                            popUpTo("level_settings_shapes/$levelName/$uid") { inclusive = true }
+                        }
                     }
-                }
-        )
+            )
+        } else {
+            Text(
+                text = "返回",
+                color = Color.White,
+                modifier = Modifier
+                    .padding(16.dp)
+                    .clickable {
+                        navController.navigate("mode_select/$uid") {
+                            popUpTo("level_settings_shapes/$levelName/$uid") { inclusive = true }
+                        }
+                    }
+            )
+        }
 
         Column(
             modifier = Modifier
@@ -97,7 +112,7 @@ fun LevelSettingsShapesScreen(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(24.dp)
             ) {
-                // 左側星數說明
+                // 左側星數
                 Column(
                     modifier = Modifier.weight(1f),
                     horizontalAlignment = Alignment.CenterHorizontally
@@ -124,7 +139,7 @@ fun LevelSettingsShapesScreen(
                     }
                 }
 
-                // 右側下拉選單區
+                // 右側選單
                 Column(
                     modifier = Modifier.weight(1f),
                     horizontalAlignment = Alignment.End
@@ -159,12 +174,22 @@ fun LevelSettingsShapesScreen(
             Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterEnd) {
                 Button(
                     onClick = {
-                        val totalTimeSeconds = selectedPracticeTime
+                        val practiceMinutes = selectedPracticeTime
+                        val intervalSeconds = selectedInterval
+
                         when (selectedColorMode) {
-                            "固定顏色" -> navController.navigate("game_shapes_single/$levelName/$mockUserId/$totalTimeSeconds")
-                            "多色順序" -> navController.navigate("game_shapes_multi/$levelName/$mockUserId/sequence/$totalTimeSeconds")
-                            "多色隨機" -> navController.navigate("game_shapes_multi/$levelName/$mockUserId/random/$totalTimeSeconds")
-                            else -> navController.navigate("game_shapes_single/$levelName/$mockUserId/$totalTimeSeconds")
+                            "固定顏色" -> navController.navigate(
+                                "game_shapes_single/$levelName/$uid/$practiceMinutes/$intervalSeconds"
+                            )
+                            "多色順序" -> navController.navigate(
+                                "game_shapes_multi/$levelName/$uid/sequence/$practiceMinutes/$intervalSeconds"
+                            )
+                            "多色隨機" -> navController.navigate(
+                                "game_shapes_multi/$levelName/$uid/random/$practiceMinutes/$intervalSeconds"
+                            )
+                            else -> navController.navigate(
+                                "game_shapes_single/$levelName/$uid/$practiceMinutes/$intervalSeconds"
+                            )
                         }
                     },
                     modifier = Modifier.width(200.dp),
@@ -174,21 +199,6 @@ fun LevelSettingsShapesScreen(
                     Text("開始遊戲", color = Color.White, style = MaterialTheme.typography.titleMedium)
                 }
             }
-//
-//            // 返回按鈕
-//            Button(
-//                onClick = {
-//                    navController.navigate("mode_select/$mockUserId") {
-//                        popUpTo("level_settings_shapes/$levelName/$mockUserId") {
-//                            inclusive = true
-//                        }
-//                    }
-//                },
-//                colors = ButtonDefaults.buttonColors(containerColor = Color.Gray)
-//            ) {
-//                Text("返回關卡選擇", color = Color.White)
-//            }
         }
     }
 }
-

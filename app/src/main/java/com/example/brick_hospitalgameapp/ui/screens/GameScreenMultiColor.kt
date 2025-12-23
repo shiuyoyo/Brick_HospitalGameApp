@@ -20,11 +20,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.brick_hospitalgameapp.models.UserProfile
+import com.example.brick_hospitalgameapp.ui.utils.drawableIdByName
 import kotlinx.coroutines.delay
+import kotlin.math.max
 import kotlin.random.Random
-import com.example.brick_hospitalgameapp.ui.screens.GameSummaryScreenMultiColor
 
-// GameScreenMultiColor.kt
 @SuppressLint("DiscouragedApi")
 @Composable
 fun GameScreenMultiColor(
@@ -32,11 +32,20 @@ fun GameScreenMultiColor(
     userProfile: UserProfile?,
     mockUserId: String?,
     levelName: String = "關卡2",
-    totalTimeSeconds: Int = 60,
-    colorMode: String = "sequence" // "fixed" / "sequence" / "random"
+    colorMode: String = "sequence", // fixed / sequence / random
+    practiceMinutes: Int = 20,
+    intervalSeconds: Int = 20
 ) {
     val context = LocalContext.current
-    val colors = listOf(Color.Red, Color.Yellow, Color.Blue, Color.Green)
+
+    val bgId = remember { drawableIdByName(context, "game_bg_shape") }
+    val restartId = remember { drawableIdByName(context, "btn_restart") }
+    val endId = remember { drawableIdByName(context, "btn_end_game") }
+
+    val colors = remember { listOf(Color.Red, Color.Yellow, Color.Blue, Color.Green) }
+    val totalCircles = 20
+    val circles = remember { List(totalCircles) { it } }
+
     var scoreMap by remember { mutableStateOf(colors.associateWith { 0 }.toMutableMap()) }
     var mistakesMap by remember { mutableStateOf(colors.associateWith { 0 }.toMutableMap()) }
 
@@ -45,80 +54,108 @@ fun GameScreenMultiColor(
     var activeColor by remember { mutableStateOf(colors[0]) }
     var gameEnded by remember { mutableStateOf(false) }
 
-    val totalCircles = 20
-    val circles = List(totalCircles) { it }
-    val circleIntervalMs = totalTimeSeconds * 1000 / totalCircles
+    val totalTimeSeconds = max(1, practiceMinutes * 60)
+    val intervalMs = max(1, intervalSeconds) * 1000L
 
-    // 自動跳下一格，沒點擊算失誤
-    LaunchedEffect(currentCircleIndex) {
-        while (currentCircleIndex < totalCircles && !gameEnded) {
-            delay(circleIntervalMs.toLong())
-            mistakesMap[activeColor] = (mistakesMap[activeColor] ?: 0) + 1
-            currentCircleIndex += 1
-            if (currentCircleIndex < totalCircles) {
-                activeColor = when(colorMode) {
-                    "sequence" -> colors[currentCircleIndex % colors.size]
-                    "random" -> colors[Random.nextInt(colors.size)]
-                    else -> colors[0]
-                }
-            } else {
-                gameEnded = true
-            }
+    val uid = userProfile?.id ?: mockUserId ?: "mock_user"
+
+    fun nextColor(nextIndex: Int): Color {
+        return when (colorMode) {
+            "fixed" -> colors[0]
+            "random" -> colors[Random.nextInt(colors.size)]
+            else -> colors[nextIndex % colors.size] // sequence
         }
     }
 
-    // 倒計時檢查總時間，時間到自動結束遊戲
+    fun finishAndGoSummary() {
+        if (gameEnded) return
+        gameEnded = true
+
+        // 存到上一頁 entry（避免你 pop 掉遊戲頁後 summary 取不到）
+        val target = navController.previousBackStackEntry ?: navController.currentBackStackEntry
+        target?.savedStateHandle?.set("scoreMap", HashMap(scoreMap))
+        target?.savedStateHandle?.set("mistakesMap", HashMap(mistakesMap))
+
+        navController.navigate("game_summary_multi_color/$levelName/$uid/$elapsedTime") {
+            popUpTo("game_multi_color/$levelName/$uid/$colorMode/$practiceMinutes/$intervalSeconds") { inclusive = true }
+        }
+    }
+
+    // 總時間計時
     LaunchedEffect(Unit) {
         while (!gameEnded) {
             delay(1000)
             elapsedTime += 1
             if (elapsedTime >= totalTimeSeconds) {
-                gameEnded = true
+                finishAndGoSummary()
             }
         }
     }
 
+    // 每 intervalSeconds 自動跳格（沒點到算錯：算在當前 activeColor）
+    LaunchedEffect(currentCircleIndex) {
+        if (!gameEnded) {
+            delay(intervalMs)
+            mistakesMap[activeColor] = (mistakesMap[activeColor] ?: 0) + 1
+
+            currentCircleIndex += 1
+            if (currentCircleIndex >= totalCircles) currentCircleIndex = 0
+
+            activeColor = nextColor(currentCircleIndex)
+        }
+    }
+
     Box(modifier = Modifier.fillMaxSize()) {
-        // 背景
-        Image(
-            painter = painterResource(id = context.resources.getIdentifier("game_bg_shape","drawable",context.packageName)),
-            contentDescription = "背景",
-            contentScale = ContentScale.Crop,
-            modifier = Modifier.fillMaxSize()
-        )
+
+        if (bgId != 0) {
+            Image(
+                painter = painterResource(bgId),
+                contentDescription = "背景",
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize()
+            )
+        } else {
+            Box(Modifier.fillMaxSize().background(Color.White))
+        }
 
         Row(modifier = Modifier.fillMaxSize().padding(55.dp)) {
+
             // 左側圓圈
-            Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(30.dp)) {
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(30.dp)
+            ) {
                 circles.chunked(5).forEachIndexed { rowIndex, row ->
-                    Row(horizontalArrangement = Arrangement.spacedBy(65.dp), verticalAlignment = Alignment.CenterVertically) {
-                        row.forEachIndexed { colIndex, circle ->
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(65.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        row.forEachIndexed { colIndex, _ ->
                             val index = rowIndex * 5 + colIndex
                             val isActive = index == currentCircleIndex
-                            val circleColor = if(isActive) activeColor else Color.LightGray
+                            val circleColor = if (isActive) activeColor.copy(alpha = 0.5f) else Color.LightGray
+
                             Box(
                                 modifier = Modifier
                                     .size(150.dp)
                                     .clip(CircleShape)
-                                    .background(circleColor.copy(alpha = if(isActive)0.5f else 1f))
-                                    .border(width=if(isActive)3.dp else 1.dp, color=if(isActive) activeColor else Color.Gray, shape=CircleShape)
-                                    .clickable(enabled=!gameEnded){
-                                        if(isActive){
-                                            scoreMap[activeColor] = (scoreMap[activeColor] ?:0) + 1
-                                            currentCircleIndex +=1
-                                            if(currentCircleIndex < totalCircles){
-                                                activeColor = when(colorMode){
-                                                    "sequence" -> colors[currentCircleIndex % colors.size]
-                                                    "random" -> colors[Random.nextInt(colors.size)]
-                                                    else -> colors[0]
-                                                }
-                                            } else gameEnded=true
+                                    .background(circleColor)
+                                    .border(
+                                        width = if (isActive) 3.dp else 1.dp,
+                                        color = if (isActive) activeColor else Color.Gray,
+                                        shape = CircleShape
+                                    )
+                                    .clickable(enabled = !gameEnded) {
+                                        if (isActive) {
+                                            scoreMap[activeColor] = (scoreMap[activeColor] ?: 0) + 1
+                                            currentCircleIndex += 1
+                                            if (currentCircleIndex >= totalCircles) currentCircleIndex = 0
+                                            activeColor = nextColor(currentCircleIndex)
                                         } else {
-                                            mistakesMap[activeColor] = (mistakesMap[activeColor] ?:0) + 1
+                                            mistakesMap[activeColor] = (mistakesMap[activeColor] ?: 0) + 1
                                         }
-                                    },
-                                contentAlignment = Alignment.Center
-                            ){ }
+                                    }
+                            ) {}
                         }
                     }
                 }
@@ -126,67 +163,71 @@ fun GameScreenMultiColor(
 
             Spacer(modifier = Modifier.width(16.dp))
 
-            // 右側資訊欄
-            Column(modifier=Modifier.width(140.dp), verticalArrangement = Arrangement.Top, horizontalAlignment = Alignment.End){
-                Text(text=levelName,color=Color.Black, style=MaterialTheme.typography.headlineMedium)
-                Spacer(modifier=Modifier.height(70.dp))
-                colors.forEach { c ->
-                    Text(text="${c.getColorName()}: ${scoreMap[c]} / ${mistakesMap[c]}", color=Color.Black, fontSize=16.sp)
-                    Spacer(modifier=Modifier.height(16.dp))
-                }
-
+            // 右側資訊欄 + 控制
+            Column(
+                modifier = Modifier.width(200.dp),
+                verticalArrangement = Arrangement.Top,
+                horizontalAlignment = Alignment.End
+            ) {
+                Text(levelName, color = Color.Black, style = MaterialTheme.typography.headlineMedium)
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // 新增時間計時器
-                Text(
-                    text = "時間: ${elapsedTime}s",
-                    color = Color.Black,
-                    fontSize = 16.sp
-                )
+                Text("時間: ${elapsedTime} / ${totalTimeSeconds}s", color = Color.Black, fontSize = 16.sp)
+                Spacer(modifier = Modifier.height(12.dp))
 
-                Spacer(modifier=Modifier.height(130.dp))
-                // 重新開始
-                Image(
-                    painter=painterResource(id=context.resources.getIdentifier("btn_restart","drawable",context.packageName)),
-                    contentDescription="重新開始",
-                    modifier=Modifier
-                        .size(120.dp)
-                        .offset(x = 50.dp, y = 40.dp)
-                        .clickable {
-                            navController.navigate("level_settings/$levelName/$mockUserId"){
-                                popUpTo("game_multi_color/$levelName/$mockUserId/$colorMode"){inclusive=true}
-                            }
-                        }
-                )
-                Spacer(modifier=Modifier.height(16.dp))
-                // 停止遊戲
-                Image(
-                    painter=painterResource(id=context.resources.getIdentifier("btn_end_game","drawable",context.packageName)),
-                    contentDescription="停止遊戲",
-                    modifier=Modifier
-                        .size(120.dp)
-                        .offset(x = 50.dp, y = 40.dp)
-                        .clickable {
-                            // 存 Map
-                            val previousEntry = navController.previousBackStackEntry
-                            previousEntry?.savedStateHandle?.set("scoreMap", scoreMap)
-                            previousEntry?.savedStateHandle?.set("mistakesMap", mistakesMap)
+                Text("目前顏色: ${activeColor.getColorName()}", color = Color.Black, fontSize = 16.sp)
+                Spacer(modifier = Modifier.height(16.dp))
 
-                            navController.navigate("game_summary_multi_color/$levelName/$mockUserId/$totalTimeSeconds") {
-                                popUpTo("game_multi_color/$levelName/$mockUserId/$colorMode") { inclusive = true }
+                Text("分數統計:", color = Color.Black, fontSize = 16.sp)
+                Spacer(modifier = Modifier.height(8.dp))
+
+                colors.forEach { c ->
+                    Text(
+                        text = "${c.getColorName()}: 正確 ${scoreMap[c] ?: 0} / 錯誤 ${mistakesMap[c] ?: 0}",
+                        color = Color.Black,
+                        fontSize = 14.sp
+                    )
+                    Spacer(modifier = Modifier.height(6.dp))
+                }
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                if (restartId != 0) {
+                    Image(
+                        painter = painterResource(restartId),
+                        contentDescription = "重新開始",
+                        modifier = Modifier
+                            .size(120.dp)
+                            .offset(x = 40.dp, y = 10.dp)
+                            .clickable {
+                                navController.navigate("level_settings/$levelName/$uid") {
+                                    popUpTo("game_multi_color/$levelName/$uid/$colorMode/$practiceMinutes/$intervalSeconds") {
+                                        inclusive = true
+                                    }
+                                }
                             }
-                        }
-                )
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                if (endId != 0) {
+                    Image(
+                        painter = painterResource(endId),
+                        contentDescription = "結束遊戲",
+                        modifier = Modifier
+                            .size(120.dp)
+                            .offset(x = 40.dp, y = 10.dp)
+                            .clickable { finishAndGoSummary() }
+                    )
+                } else {
+                    Button(
+                        onClick = { finishAndGoSummary() },
+                        colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
+                    ) { Text("結束遊戲", color = Color.White) }
+                }
             }
         }
     }
 }
 
-// 擴展函數取得顏色名稱
-fun Color.getColorName(): String = when(this){
-    Color.Red -> "紅色"
-    Color.Yellow -> "黃色"
-    Color.Blue -> "藍色"
-    Color.Green -> "綠色"
-    else -> "未知"
-}

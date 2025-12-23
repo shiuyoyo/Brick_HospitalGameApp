@@ -76,40 +76,45 @@ fun AppNavGraph(navController: NavHostController, userProfile: UserProfile?) {
 
         // 關卡一遊戲頁 (單色)
         composable(
-            route = "game_single_color/{levelName}/{mockUserId}/{totalTimeSeconds}",
+            route = "game_single_color/{levelName}/{mockUserId}/{practiceMinutes}/{intervalSeconds}",
             arguments = listOf(
                 navArgument("levelName") { type = NavType.StringType },
                 navArgument("mockUserId") { type = NavType.StringType; nullable = true },
-                navArgument("totalTimeSeconds") { type = NavType.IntType }
+                navArgument("practiceMinutes") { type = NavType.IntType },
+                navArgument("intervalSeconds") { type = NavType.IntType }
             )
         ) { backStackEntry ->
             val levelName = backStackEntry.arguments?.getString("levelName") ?: "關卡1"
             val mockUserId = backStackEntry.arguments?.getString("mockUserId")
-            val totalTime = backStackEntry.arguments?.getInt("totalTimeSeconds") ?: 60
+            val practiceMinutes = backStackEntry.arguments?.getInt("practiceMinutes") ?: 20
+            val intervalSeconds = backStackEntry.arguments?.getInt("intervalSeconds") ?: 20
 
             GameScreenSingleColor(
                 navController = navController,
                 userProfile = userProfile,
                 mockUserId = mockUserId,
                 levelName = levelName,
-                totalTimeSeconds = totalTime
+                practiceMinutes = practiceMinutes,
+                intervalSeconds = intervalSeconds
             )
         }
 
-        // 關卡一遊戲頁 (多色)
+// 關卡一遊戲頁 (多色)
         composable(
-            route = "game_multi_color/{levelName}/{mockUserId}/{colorMode}/{totalTimeSeconds}",
+            route = "game_multi_color/{levelName}/{mockUserId}/{colorMode}/{practiceMinutes}/{intervalSeconds}",
             arguments = listOf(
                 navArgument("levelName") { type = NavType.StringType },
                 navArgument("mockUserId") { type = NavType.StringType; nullable = true },
                 navArgument("colorMode") { type = NavType.StringType },
-                navArgument("totalTimeSeconds") { type = NavType.IntType }
+                navArgument("practiceMinutes") { type = NavType.IntType },
+                navArgument("intervalSeconds") { type = NavType.IntType }
             )
         ) { backStackEntry ->
             val levelName = backStackEntry.arguments?.getString("levelName") ?: "關卡1"
             val mockUserId = backStackEntry.arguments?.getString("mockUserId")
             val colorMode = backStackEntry.arguments?.getString("colorMode") ?: "sequence"
-            val totalTime = backStackEntry.arguments?.getInt("totalTimeSeconds") ?: 60
+            val practiceMinutes = backStackEntry.arguments?.getInt("practiceMinutes") ?: 20
+            val intervalSeconds = backStackEntry.arguments?.getInt("intervalSeconds") ?: 20
 
             GameScreenMultiColor(
                 navController = navController,
@@ -117,9 +122,11 @@ fun AppNavGraph(navController: NavHostController, userProfile: UserProfile?) {
                 mockUserId = mockUserId,
                 levelName = levelName,
                 colorMode = colorMode,
-                totalTimeSeconds = totalTime
+                practiceMinutes = practiceMinutes,
+                intervalSeconds = intervalSeconds
             )
         }
+
 
         // 關卡一結算頁
         composable(
@@ -180,40 +187,45 @@ fun AppNavGraph(navController: NavHostController, userProfile: UserProfile?) {
 
         // 關卡二單色遊戲
         composable(
-            route = "game_shapes_single/{levelName}/{mockUserId}/{totalTimeSeconds}",
+            route = "game_shapes_single/{levelName}/{mockUserId}/{practiceMinutes}/{intervalSeconds}",
             arguments = listOf(
                 navArgument("levelName") { type = NavType.StringType },
                 navArgument("mockUserId") { type = NavType.StringType; nullable = true },
-                navArgument("totalTimeSeconds") { type = NavType.IntType }
+                navArgument("practiceMinutes") { type = NavType.IntType },
+                navArgument("intervalSeconds") { type = NavType.IntType }
             )
         ) { backStackEntry ->
             val levelName = backStackEntry.arguments?.getString("levelName") ?: "關卡2"
             val mockUserId = backStackEntry.arguments?.getString("mockUserId")
-            val totalTime = backStackEntry.arguments?.getInt("totalTimeSeconds") ?: 60
+            val practiceMinutes = backStackEntry.arguments?.getInt("practiceMinutes") ?: 20
+            val intervalSeconds = backStackEntry.arguments?.getInt("intervalSeconds") ?: 20
 
             GameScreenShapesSingle(
                 navController = navController,
                 userProfile = userProfile,
                 mockUserId = mockUserId,
                 levelName = levelName,
-                totalTimeSeconds = totalTime
+                practiceMinutes = practiceMinutes,
+                intervalSeconds = intervalSeconds
             )
         }
 
-        // 關卡二多色遊戲
+// 關卡二多色遊戲
         composable(
-            route = "game_shapes_multi/{levelName}/{mockUserId}/{colorMode}/{totalTimeSeconds}",
+            route = "game_shapes_multi/{levelName}/{mockUserId}/{colorMode}/{practiceMinutes}/{intervalSeconds}",
             arguments = listOf(
                 navArgument("levelName") { type = NavType.StringType },
                 navArgument("mockUserId") { type = NavType.StringType; nullable = true },
                 navArgument("colorMode") { type = NavType.StringType },
-                navArgument("totalTimeSeconds") { type = NavType.IntType }
+                navArgument("practiceMinutes") { type = NavType.IntType },
+                navArgument("intervalSeconds") { type = NavType.IntType }
             )
         ) { backStackEntry ->
             val levelName = backStackEntry.arguments?.getString("levelName") ?: "關卡2"
             val mockUserId = backStackEntry.arguments?.getString("mockUserId")
             val colorMode = backStackEntry.arguments?.getString("colorMode") ?: "sequence"
-            val totalTime = backStackEntry.arguments?.getInt("totalTimeSeconds") ?: 60
+            val practiceMinutes = backStackEntry.arguments?.getInt("practiceMinutes") ?: 20
+            val intervalSeconds = backStackEntry.arguments?.getInt("intervalSeconds") ?: 20
 
             GameScreenShapesMultiColor(
                 navController = navController,
@@ -221,9 +233,11 @@ fun AppNavGraph(navController: NavHostController, userProfile: UserProfile?) {
                 mockUserId = mockUserId,
                 levelName = levelName,
                 colorMode = colorMode,
-                totalTimeSeconds = totalTime
+                practiceMinutes = practiceMinutes,
+                intervalSeconds = intervalSeconds
             )
         }
+
 
         // 關卡二結算頁
         composable(
@@ -254,10 +268,12 @@ fun AppNavGraph(navController: NavHostController, userProfile: UserProfile?) {
             )
         }
 
-        //關卡3
+        // 關卡3
         composable(
             route = "level_setting_thin/{mockUserId}",
-            arguments = listOf(navArgument("mockUserId"){ type = NavType.StringType; nullable=true })
+            arguments = listOf(
+                navArgument("mockUserId") { type = NavType.StringType; nullable = true }
+            )
         ) { backStackEntry ->
             val mockUserId = backStackEntry.arguments?.getString("mockUserId")
             LevelSettingsThinScreen(
@@ -268,30 +284,28 @@ fun AppNavGraph(navController: NavHostController, userProfile: UserProfile?) {
         }
 
         composable(
-            route = "game_thin_circle/{levelName}/{mockUserId}/{totalTimeSeconds}",
+            route = "game_thin_circle/{levelName}/{mockUserId}/{practiceMinutes}/{intervalSeconds}",
             arguments = listOf(
                 navArgument("levelName") { type = NavType.StringType },
                 navArgument("mockUserId") { type = NavType.StringType; nullable = true },
-                navArgument("totalTimeSeconds") { type = NavType.IntType }
+                navArgument("practiceMinutes") { type = NavType.IntType },
+                navArgument("intervalSeconds") { type = NavType.IntType }
             )
         ) { backStackEntry ->
             val levelName = backStackEntry.arguments?.getString("levelName") ?: "關卡3"
             val mockUserId = backStackEntry.arguments?.getString("mockUserId")
-            val totalTime = backStackEntry.arguments?.getInt("totalTimeSeconds") ?: 60
-            val scoreMap =
-                navController.previousBackStackEntry?.savedStateHandle?.get<Map<Color, Int>>("scoreMap") ?: emptyMap()
-            val mistakesMap =
-                navController.previousBackStackEntry?.savedStateHandle?.get<Map<Color, Int>>("mistakesMap") ?: emptyMap()
+            val practiceMinutes = backStackEntry.arguments?.getInt("practiceMinutes") ?: 20
+            val intervalSeconds = backStackEntry.arguments?.getInt("intervalSeconds") ?: 20
 
             GameScreenThinCircle(
                 navController = navController,
                 levelName = levelName,
                 mockUserId = mockUserId,
-                totalTimeSeconds = totalTime,
-                scoreMap = scoreMap,
-                mistakesMap = mistakesMap,
+                practiceMinutes = practiceMinutes,
+                intervalSeconds = intervalSeconds
             )
         }
+
 
     }
 }

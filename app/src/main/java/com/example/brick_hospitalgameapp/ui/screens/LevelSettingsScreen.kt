@@ -17,6 +17,7 @@ import androidx.navigation.NavController
 import com.example.brick_hospitalgameapp.models.UserProfile
 import com.example.brick_hospitalgameapp.R
 import com.example.brick_hospitalgameapp.components.PickerSelector
+import com.example.brick_hospitalgameapp.ui.utils.drawableIdByName
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -25,22 +26,23 @@ fun LevelSettingsScreen(
     levelName: String,
     userProfile: UserProfile?,
     mockUserId: String?,
-    userId: String="unknown"
+    userId: String = "unknown"
 ) {
     val context = LocalContext.current
-    val currentUserId = userProfile?.id ?: mockUserId ?: "mock_user"
+    val uid = userProfile?.id ?: mockUserId ?: "guest"
 
-    val practiceTimes = listOf(3,5,10,15,20,25,30)
-    val intervalTimes = listOf(5,10,15,20,25)
+    val practiceTimes = listOf(3, 5, 10, 15, 20, 25, 30)     // 分鐘
+    val intervalTimes = listOf(5, 10, 15, 20, 25)            // 秒
     val colorModes = listOf("固定顏色", "多色順序", "多色隨機")
 
-    var selectedPracticeTime by remember { mutableStateOf(20) }
-    var selectedInterval by remember { mutableStateOf(20) }
+    var selectedPracticeTime by remember { mutableStateOf(20) } // 分鐘
+    var selectedInterval by remember { mutableStateOf(20) }     // 秒
     var selectedColorMode by remember { mutableStateOf("固定顏色") }
 
+    // 用 interval 秒數換算星等（你原本邏輯保留）
     val stars by remember(selectedInterval, selectedColorMode) {
         mutableStateOf(
-            when(selectedInterval) {
+            when (selectedInterval) {
                 25 -> 1
                 20 -> 2
                 15 -> 3
@@ -51,32 +53,51 @@ fun LevelSettingsScreen(
         )
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        Image(
-            painter = painterResource(
-                id = context.resources.getIdentifier("level_bg", "drawable", context.packageName)
-            ),
-            contentDescription = "背景",
-            modifier = Modifier.fillMaxSize(),
-            contentScale = ContentScale.Crop
-        )
+    // A 方案 drawable 防呆
+    val bgId = remember { drawableIdByName(context, "level_bg") }
+    val backId = remember { drawableIdByName(context, "btn_back") }
 
-        // 左上角自定義返回按鈕（圖片）
-        Image(
-            painter = painterResource(
-                id = context.resources.getIdentifier("btn_back", "drawable", context.packageName)
-            ),
-            contentDescription = "返回關卡選擇",
-            modifier = Modifier
-                .size(120.dp)
-                .padding(10.dp)
-                .clickable {
-                    val uid = mockUserId ?: "guest"
-                    navController.navigate("mode_select/$uid") {
-                        popUpTo("level_settings/$levelName/$uid") { inclusive = true }
+    Box(modifier = Modifier.fillMaxSize()) {
+
+        if (bgId != 0) {
+            Image(
+                painter = painterResource(bgId),
+                contentDescription = "背景",
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop
+            )
+        } else {
+            Box(Modifier.fillMaxSize())
+        }
+
+        // 左上角返回按鈕
+        if (backId != 0) {
+            Image(
+                painter = painterResource(backId),
+                contentDescription = "返回關卡選擇",
+                modifier = Modifier
+                    .size(120.dp)
+                    .padding(10.dp)
+                    .clickable {
+                        navController.navigate("mode_select/$uid") {
+                            popUpTo("level_settings/$levelName/$uid") { inclusive = true }
+                        }
                     }
-                }
-        )
+            )
+        } else {
+            Text(
+                text = "返回",
+                color = Color.White,
+                modifier = Modifier
+                    .padding(16.dp)
+                    .clickable {
+                        navController.navigate("mode_select/$uid") {
+                            popUpTo("level_settings/$levelName/$uid") { inclusive = true }
+                        }
+                    }
+            )
+        }
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -108,7 +129,7 @@ fun LevelSettingsScreen(
                                 modifier = Modifier.size(36.dp)
                             )
                         }
-                        repeat(5-stars) {
+                        repeat(5 - stars) {
                             Icon(
                                 painter = painterResource(id = R.drawable.ic_star_border),
                                 contentDescription = "Empty Star",
@@ -153,20 +174,29 @@ fun LevelSettingsScreen(
             Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterEnd) {
                 Button(
                     onClick = {
-                        val uid = userProfile?.id ?: mockUserId ?: "guest"
+                        val practiceMinutes = selectedPracticeTime
+                        val intervalSeconds = selectedInterval
 
                         when (selectedColorMode) {
                             "固定顏色" -> {
-                                navController.navigate("game_single_color/$levelName/$uid/$selectedInterval")
+                                navController.navigate(
+                                    "game_single_color/$levelName/$uid/$practiceMinutes/$intervalSeconds"
+                                )
                             }
                             "多色順序" -> {
-                                navController.navigate("game_multi_color/$levelName/$uid/sequence/$selectedInterval")
+                                navController.navigate(
+                                    "game_multi_color/$levelName/$uid/sequence/$practiceMinutes/$intervalSeconds"
+                                )
                             }
                             "多色隨機" -> {
-                                navController.navigate("game_multi_color/$levelName/$uid/random/$selectedInterval")
+                                navController.navigate(
+                                    "game_multi_color/$levelName/$uid/random/$practiceMinutes/$intervalSeconds"
+                                )
                             }
                             else -> {
-                                navController.navigate("game_single_color/$levelName/$uid")
+                                navController.navigate(
+                                    "game_single_color/$levelName/$uid/$practiceMinutes/$intervalSeconds"
+                                )
                             }
                         }
                     },
@@ -177,7 +207,6 @@ fun LevelSettingsScreen(
                     Text("開始遊戲", color = Color.White, style = MaterialTheme.typography.titleMedium)
                 }
             }
-
         }
     }
 }
