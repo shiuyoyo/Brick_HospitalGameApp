@@ -47,7 +47,7 @@ fun GameScreenSingleColor(
     var currentCircleIndex by remember { mutableStateOf(0) }
     var gameEnded by remember { mutableStateOf(false) }
 
-    val totalCircles = 20
+    val totalCircles = 15
     val circles = remember { List(totalCircles) { it } }
 
     val totalTimeSeconds = max(1, practiceMinutes * 60)
@@ -100,15 +100,15 @@ fun GameScreenSingleColor(
             Box(Modifier.fillMaxSize().background(Color.White))
         }
 
-        Row(modifier = Modifier.fillMaxSize().padding(55.dp)) {
+        Row(modifier = Modifier.fillMaxSize().padding(55.dp, vertical = 100.dp)) {
 
             Column(
                 modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(34.dp)
+                verticalArrangement = Arrangement.spacedBy(70.dp)
             ) {
                 circles.chunked(5).forEachIndexed { rowIndex, row ->
                     Row(
-                        horizontalArrangement = Arrangement.spacedBy(72.dp),
+                        horizontalArrangement = Arrangement.spacedBy(60.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         row.forEachIndexed { colIndex, _ ->

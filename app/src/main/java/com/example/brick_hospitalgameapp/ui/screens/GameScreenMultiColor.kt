@@ -118,16 +118,16 @@ fun GameScreenMultiColor(
             Box(Modifier.fillMaxSize().background(Color.White))
         }
 
-        Row(modifier = Modifier.fillMaxSize().padding(55.dp)) {
+        Row(modifier = Modifier.fillMaxSize().padding(55.dp, vertical = 100.dp)) {
 
             // 左側圓圈
             Column(
                 modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(30.dp)
+                verticalArrangement = Arrangement.spacedBy(70.dp)
             ) {
                 circles.chunked(5).forEachIndexed { rowIndex, row ->
                     Row(
-                        horizontalArrangement = Arrangement.spacedBy(65.dp),
+                        horizontalArrangement = Arrangement.spacedBy(50.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         row.forEachIndexed { colIndex, _ ->

@@ -33,7 +33,7 @@ fun LevelSettingsScreen(
 
     val practiceTimes = listOf(3, 5, 10, 15, 20, 25, 30)     // 分鐘
     val intervalTimes = listOf(5, 10, 15, 20, 25)            // 秒
-    val colorModes = listOf("固定顏色", "多色順序", "多色隨機")
+    val colorModes = listOf("固定顏色", "多色順序", "多色隨機", "手機多色測試")
 
     var selectedPracticeTime by remember { mutableStateOf(20) } // 分鐘
     var selectedInterval by remember { mutableStateOf(20) }     // 秒
@@ -144,6 +144,27 @@ fun LevelSettingsScreen(
                     modifier = Modifier.weight(1f),
                     horizontalAlignment = Alignment.End,
                 ) {
+
+
+//這邊是方便測式加了一個button，要移除
+                    /*Button(
+                        onClick = {
+                            val practiceMinutes = selectedPracticeTime
+                            val intervalSeconds = selectedInterval
+                            val uid = userProfile?.id ?: mockUserId ?: "mock_user"
+                            navController.navigate("game_multi_color_mobile_microbit/顏色遊戲/$uid/random/$practiceMinutes/$intervalSeconds")
+
+
+                            //throw RuntimeException("Test Crash") // Force a crash
+                        },
+                        modifier = Modifier.width(200.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4F46E5)),
+                        shape = RoundedCornerShape(16.dp)
+                    ) {
+                        Text("開始遊戲", color = Color.White, style = MaterialTheme.typography.titleMedium)
+                    }*/
+//這邊是方便測式加了一個button，要移除
+
                     PickerSelector(
                         label = "練習時間(分鐘)",
                         options = practiceTimes,
@@ -192,7 +213,11 @@ fun LevelSettingsScreen(
                                 navController.navigate(
                                     "game_multi_color/$levelName/$uid/random/$practiceMinutes/$intervalSeconds"
                                 )
-                            }
+                            }/*
+                            "手機多色測試" -> {
+                                navController.navigate("game_multi_color_mobile_microbit/顏色遊戲/$uid/random/$practiceMinutes/$intervalSeconds")
+
+                            }*/
                             else -> {
                                 navController.navigate(
                                     "game_single_color/$levelName/$uid/$practiceMinutes/$intervalSeconds"

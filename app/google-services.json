@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1088129061766",
+    "project_id": "hospitalgameapp",
+    "storage_bucket": "hospitalgameapp.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1088129061766:android:2debf960e4fb936f071207",
+        "android_client_info": {
+          "package_name": "com.example.brick_hospitalgameapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCehAsxJgHzmjU7mAVAU-7pq4EH-HTHAiw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

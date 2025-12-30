@@ -10,7 +10,6 @@ import androidx.navigation.navArgument
 import com.example.brick_hospitalgameapp.models.UserProfile
 import com.example.brick_hospitalgameapp.screens.*
 import com.example.brick_hospitalgameapp.ui.screens.*
-
 @Composable
 fun AppNavGraph(navController: NavHostController, userProfile: UserProfile?) {
     NavHost(
@@ -268,7 +267,7 @@ fun AppNavGraph(navController: NavHostController, userProfile: UserProfile?) {
             )
         }
 
-        // 關卡3
+        // 關卡3 - 設定頁
         composable(
             route = "level_setting_thin/{mockUserId}",
             arguments = listOf(
@@ -283,6 +282,7 @@ fun AppNavGraph(navController: NavHostController, userProfile: UserProfile?) {
             )
         }
 
+// 關卡3 - 遊戲頁（注意：practiceMinutes / intervalSeconds）
         composable(
             route = "game_thin_circle/{levelName}/{mockUserId}/{practiceMinutes}/{intervalSeconds}",
             arguments = listOf(
@@ -297,6 +297,11 @@ fun AppNavGraph(navController: NavHostController, userProfile: UserProfile?) {
             val practiceMinutes = backStackEntry.arguments?.getInt("practiceMinutes") ?: 20
             val intervalSeconds = backStackEntry.arguments?.getInt("intervalSeconds") ?: 20
 
+            val scoreMap =
+                navController.previousBackStackEntry?.savedStateHandle?.get<Map<Color, Int>>("scoreMap") ?: emptyMap()
+            val mistakesMap =
+                navController.previousBackStackEntry?.savedStateHandle?.get<Map<Color, Int>>("mistakesMap") ?: emptyMap()
+
             GameScreenThinCircle(
                 navController = navController,
                 levelName = levelName,
@@ -306,6 +311,33 @@ fun AppNavGraph(navController: NavHostController, userProfile: UserProfile?) {
             )
         }
 
+
+        composable(
+            route = "game_multi_color_mobile_microbit/{levelName}/{mockUserId}/{colorMode}/{practiceMinutes}/{intervalSeconds}",
+            arguments = listOf(
+                navArgument("levelName") { type = NavType.StringType },
+                navArgument("mockUserId") { type = NavType.StringType; nullable = true },
+                navArgument("colorMode") { type = NavType.StringType },
+                navArgument("practiceMinutes") { type = NavType.IntType },
+                navArgument("intervalSeconds") { type = NavType.IntType }
+            )
+        ) { backStackEntry ->
+            val levelName = backStackEntry.arguments?.getString("levelName") ?: "顏色遊戲"
+            val mockUserId = backStackEntry.arguments?.getString("mockUserId")
+            val colorMode = backStackEntry.arguments?.getString("colorMode") ?: "sequence"
+            val practiceMinutes = backStackEntry.arguments?.getInt("practiceMinutes") ?: 20
+            val intervalSeconds = backStackEntry.arguments?.getInt("intervalSeconds") ?: 20
+
+            GameScreenMultiColorMobileMicrobit(
+                navController = navController,
+                userProfile = userProfile,
+                mockUserId = mockUserId,
+                levelName = levelName,
+                colorMode = colorMode,
+                practiceMinutes = practiceMinutes,
+                intervalSeconds = intervalSeconds
+            )
+        }
 
     }
 }

@@ -4,6 +4,10 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     kotlin("plugin.serialization") version "1.9.10" // JSON 序列化用
     id("kotlin-parcelize")
+
+    // ✅ 新增
+    id("com.google.gms.google-services")
+    id("com.google.firebase.crashlytics")
 }
 
 android {
@@ -76,5 +80,12 @@ dependencies {
     implementation("androidx.navigation:navigation-compose:2.7.3")
     //usb microbit
     implementation("com.github.mik3y:usb-serial-for-android:3.5.0")
+
+
+    // ✅ Firebase BoM（你如果已經有，就不要重複加）
+    implementation(platform("com.google.firebase:firebase-bom:34.7.0"))
+
+    // ✅ Crashlytics（注意：近年的 BoM 已不再提供 ktx；用主模組）
+    implementation("com.google.firebase:firebase-crashlytics")
 
 }

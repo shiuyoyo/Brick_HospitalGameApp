@@ -32,7 +32,7 @@ fun GameScreenThinCircle(
     levelName: String,
     mockUserId: String?,
     practiceMinutes: Int = 20,
-    intervalSeconds: Int = 20
+    intervalSeconds: Int = 20,
 ) {
     val context = LocalContext.current
     val uid = mockUserId ?: "guest"
